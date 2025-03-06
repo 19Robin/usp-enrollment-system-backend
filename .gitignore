@@ -1,0 +1,28 @@
+# Node modules
+/node_modules
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# dotenv environment variables file
+.env
+
+# build output
+/dist
+
+# IDE config files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Package distribution folder
+/coverage
+
+# Other sensitive files (if needed)
+*.pem
+*.key
