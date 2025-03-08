@@ -1,4 +1,3 @@
-// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\authController.js
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById } = require("../Model/studentModel");
