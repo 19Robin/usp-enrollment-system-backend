@@ -3,6 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const authRoutes = require("./Routes/authRoutes");
+const financeRoutes = require("./Routes/financeRoutes");
 const app = express();
 const path = require('path');
 const fs = require('fs');
@@ -17,6 +18,7 @@ app.use(cookieParser());
 
 // routes 
 app.use("/api/auth", authRoutes);
+app.use("/api/finance", financeRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

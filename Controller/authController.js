@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById } = require("../Model/studentModel");
 const errorCodes = require("./errorCodes");
+require("dotenv").config();
 
 const loginAttemptHandler = async (req, res) => {
   const { studentId, password } = req.body;

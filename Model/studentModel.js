@@ -1,5 +1,7 @@
-// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Model\studentModel.js
-const db = require('../db');
+
+// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Model\userModel.js
+const {db} = require('../db');
+
 
 const getStudentById = (studentId, callback) => {
   const query = 'SELECT * FROM students WHERE student_id = ?';
