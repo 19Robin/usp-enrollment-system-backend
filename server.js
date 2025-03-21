@@ -8,6 +8,7 @@ const profileRoutes = require("./Routes/profileRoutes");
 const courseRoutes = require("./Routes/courseRoutes");
 const programRoutes = require("./Routes/programRoutes");
 const programCourseRoutes = require("./Routes/programCourseRoutes");
+const gradeRoutes = require("./Routes/gradeRoutes"); // Add this line
 
 const app = express();
 app.use(cors());
@@ -27,6 +28,9 @@ app.use("/api", programRoutes);
 
 // Use program course routes
 app.use("/api", programCourseRoutes);
+
+// Use grade routes
+app.use("/api", gradeRoutes); // Add this line
 
 // Start Server
 app.listen(process.env.PORT || 5000, () => {
