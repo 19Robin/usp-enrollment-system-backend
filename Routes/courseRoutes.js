@@ -1,12 +1,9 @@
-// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Routes\authRoutes.js
+// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Routes\courseRoutes.js
 const express = require("express");
-const { addCourse } = require("../Controller/courseController");
+const { getCourses } = require("../Controller/courseController");
 const router = express.Router();
 
-// Define the login route
-router.post("/login", loginAttempt);
-
-// Define the add course route
-router.post("/courses", addCourse);
+// Define the route to get courses
+router.get("/courses", getCourses);
 
 module.exports = router;

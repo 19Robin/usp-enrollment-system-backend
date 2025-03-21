@@ -1,32 +1,25 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\courseController.js
-const { addCourse } = require('../Model/courseModel');
-const errorCodes = require('./errorCodes');
+const { getCourses } = require('../Model/courseModel');
 
-const addCourseHandler = async (req, res) => {
-  const { course_id, course_name, course_description } = req.body;
-
+const getCoursesHandler = async (req, res) => {
   try {
-    const course = { course_id, course_name, course_description };
-    const result = await new Promise((resolve, reject) => {
-      addCourse(course, (err, result) => {
+    const courses = await new Promise((resolve, reject) => {
+      getCourses((err, results) => {
         if (err) {
           reject(err);
         } else {
-          resolve(result);
+          resolve(results);
         }
       });
     });
 
-    res.status(201).json({
-      message: "Course added successfully",
-      course: result,
-    });
+    res.status(200).json(courses);
   } catch (error) {
-    console.error("Error adding course:", error);
+    console.error("Error fetching courses:", error);
     res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
   }
 };
 
 module.exports = {
-  addCourse: addCourseHandler,
+  getCourses: getCoursesHandler,
 };
