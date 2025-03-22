@@ -1,0 +1,34 @@
+const { enrolSystemDb } = require('../db');
+
+const getStudentById = (studentId, callback) => {
+  const query = 'SELECT * FROM students WHERE student_id = ?';
+  enrolSystemDb.query(query, [studentId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    if (results.length > 0) {
+      return callback(null, results[0]);
+    } else {
+      return callback(null, null);
+    }
+  });
+};
+
+const getManagerById = (managerId, callback) => {
+  const query = 'SELECT * FROM managers WHERE manager_id = ?';
+  enrolSystemDb.query(query, [managerId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    if (results.length > 0) {
+      return callback(null, results[0]);
+    } else {
+      return callback(null, null);
+    }
+  });
+};
+
+module.exports = {
+  getStudentById,
+  getManagerById,
+};
