@@ -5,19 +5,19 @@ const getFinanceData = (category, userID, res) => {
 
     switch(category){
         case "invoice":
-            query = `SELECT invoice_id, amount, date FROM invoices WHERE user_id = ?`;
+            query = `SELECT invoice_id, semester, amt_due, amt_paid, due_date FROM invoices WHERE student_id = ?`;
             break;
         
         case "payments":
-            query = `SELECT payment_id, amount, status FROM payments WHERE user_id = ?`;
+            query = `SELECT payment_id, semester, amt, des, receipt_id, payment_date FROM payments WHERE student_id = ?`;
             break;
 
-        case "scholarships":
-            query = 'SELECT scholarship_name, amount, status FROM scholarships WHERE user_id = ?';
+        case "sponsorships":
+            query = 'SELECT semester, sponsor  FROM sponsorship WHERE student_id = ?';
             break;
 
-        case "refund":
-            query = `SELECT hold_id, amount, status FROM holds WHERE user_id = ?`;
+        case "holds":
+            query = `SELECT semester, hold_status FROM holds WHERE student_id = ?`;
             break;
         
         default:
