@@ -32,7 +32,7 @@ const registerCourseInDB = (studentId, courseCode, semester, year, callback) => 
 
 const getActiveRegistrationsFromDB = (studentId, callback) => {
   const start = Date.now();
-  const query = 'SELECT * FROM registrations WHERE student_id = ? AND status = "active"';
+  const query = 'SELECT * FROM registrations WHERE student_id = ?';
   enrolSystemDb.query(query, [studentId], (err, results) => {
     const end = Date.now();
     console.log(`getActiveRegistrationsFromDB query took ${end - start}ms`);
