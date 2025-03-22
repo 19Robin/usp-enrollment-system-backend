@@ -1,5 +1,4 @@
-// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Model\programCourseModel.js
-const db = require('../db');
+const { enrolSystemDb } = require('../db');
 
 const getProgramCourses = (programId, callback) => {
   const query = `
@@ -8,7 +7,7 @@ const getProgramCourses = (programId, callback) => {
     JOIN courses c ON pc.course_code = c.course_code
     WHERE pc.program_id = ?
   `;
-  db.query(query, [programId], (err, results) => {
+  enrolSystemDb.query(query, [programId], (err, results) => {
     if (err) {
       return callback(err, null);
     }

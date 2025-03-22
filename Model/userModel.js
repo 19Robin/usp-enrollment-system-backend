@@ -1,9 +1,8 @@
-// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Model\userModel.js
-const db = require('../db');
+const { enrolSystemDb } = require('../db');
 
 const getStudentById = (studentId, callback) => {
   const query = 'SELECT * FROM students WHERE student_id = ?';
-  db.query(query, [studentId], (err, results) => {
+  enrolSystemDb.query(query, [studentId], (err, results) => {
     if (err) {
       return callback(err, null);
     }
@@ -17,7 +16,7 @@ const getStudentById = (studentId, callback) => {
 
 const getManagerById = (managerId, callback) => {
   const query = 'SELECT * FROM managers WHERE manager_id = ?';
-  db.query(query, [managerId], (err, results) => {
+  enrolSystemDb.query(query, [managerId], (err, results) => {
     if (err) {
       return callback(err, null);
     }
