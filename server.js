@@ -8,6 +8,7 @@ const profileRoutes = require("./Routes/profileRoutes");
 const courseRoutes = require("./Routes/courseRoutes");
 const financeRoutes = require("./Routes/financeRoutes");
 const programRoutes = require("./Routes/programRoutes");
+const holdRoutes = require("./Routes/holdsRoutes");
 const programCourseRoutes = require("./Routes/programCourseRoutes");
 const gradesRoutes = require("./Routes/gradesRoutes"); // Add this line
 
@@ -19,7 +20,7 @@ app.use(bodyParser.json());
 
 
 // Use auth routes
-
+app.use("/api/holds", holdRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", profileRoutes);
 app.use("/api/finance", financeRoutes);
