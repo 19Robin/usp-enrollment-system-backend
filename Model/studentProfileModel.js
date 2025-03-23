@@ -17,7 +17,26 @@ const getStudentProfileById = (studentId, callback) => {
     }
   });
 };
+const updateStudentProfile = (req, res) => {
+  const studentId = req.params.studentId;
+  const { email, phone } = req.body;
+
+  const query = `
+    UPDATE students
+    SET email = ?, phone = ?
+    WHERE student_id = ?
+  `;
+
+  enrolSystemDb.query(query, [email, phone, studentId], (err, result) => {
+    if (err) {
+      console.error("Error updating profile:", err);
+      return res.status(500).json({ error: "Failed to update profile." });
+    }
+    res.json({ success: true, message: "Profile updated successfully." });
+  });
+};
 
 module.exports = {
   getStudentProfileById,
+  updateStudentProfile,
 };

@@ -1,5 +1,5 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\studentProfileController.js
-const { getStudentProfileById } = require('../Model/studentProfileModel');
+const { getStudentProfileById,updateStudentProfile  } = require('../Model/studentProfileModel');
 const errorCodes = require('./errorCodes');
 
 const getStudentProfileHandler = async (req, res) => {
@@ -29,4 +29,5 @@ const getStudentProfileHandler = async (req, res) => {
 
 module.exports = {
   getStudentProfile: getStudentProfileHandler,
+  updateStudentProfile,
 };

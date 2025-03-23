@@ -6,7 +6,9 @@ const authRoutes = require("./Routes/authRoutes");
 const profileRoutes = require("./Routes/profileRoutes");
 const courseRoutes = require("./Routes/courseRoutes");
 const programRoutes = require("./Routes/programRoutes");
+const financeRoutes = require("./Routes/financeRoutes");
 const programCourseRoutes = require("./Routes/programCourseRoutes");
+const holdRoutes = require("./Routes/holdsRoutes");
 const gradesRoutes = require("./Routes/gradesRoutes"); // Add this line
 
 const app = express();
@@ -18,6 +20,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", courseRoutes);
 app.use("/api", programRoutes);
+app.use("/api/finance", financeRoutes);
+app.use("/api/holds", holdRoutes);
 app.use("/api", programCourseRoutes);
 app.use("/api", gradesRoutes); // Add this line
 
