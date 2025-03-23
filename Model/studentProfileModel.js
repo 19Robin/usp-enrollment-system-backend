@@ -1,5 +1,4 @@
-// filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Model\studentProfileModel.js
-const db = require('../db');
+const { enrolSystemDb } = require('../db');
 
 const getStudentProfileById = (studentId, callback) => {
   const query = `
@@ -7,7 +6,7 @@ const getStudentProfileById = (studentId, callback) => {
     FROM students
     WHERE student_id = ?
   `;
-  db.query(query, [studentId], (err, results) => {
+  enrolSystemDb.query(query, [studentId], (err, results) => {
     if (err) {
       return callback(err, null);
     }
