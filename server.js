@@ -7,7 +7,7 @@ const profileRoutes = require("./Routes/profileRoutes");
 const courseRoutes = require("./Routes/courseRoutes");
 const programRoutes = require("./Routes/programRoutes");
 const programCourseRoutes = require("./Routes/programCourseRoutes");
-const gradeRoutes = require("./Routes/gradeRoutes"); // Add this line
+const gradesRoutes = require("./Routes/gradeRoutes");
 
 const app = express();
 
@@ -20,16 +20,7 @@ app.use("/api", courseRoutes);
 app.use("/api", programRoutes);
 app.use("/api", programCourseRoutes);
 
-<<<<<<< HEAD
-// Use grade routes
-app.use("/api", gradeRoutes); // Add this line
-
-// Start Server
-app.listen(process.env.PORT || 5000, () => {
-  console.log(`Server running on port ${process.env.PORT || 5000}`);
-=======
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
->>>>>>> 9adddd137eb7c0611948157fd821eabfa62cf14a
 });
