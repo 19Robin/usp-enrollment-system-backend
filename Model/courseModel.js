@@ -1,34 +1,57 @@
 const { enrolSystemDb, gradesDb } = require('../db');
+const util = require('util');
+const queryAsync = util.promisify(enrolSystemDb.query).bind(enrolSystemDb);
 
-const getCourses = (callback) => {
-  const start = Date.now();
-  const query = 'SELECT * FROM courses';
-  enrolSystemDb.query(query, (err, results) => {
-    const end = Date.now();
-    console.log(`getCourses query took ${end - start}ms`);
-    if (err) {
-      console.error("Error fetching courses:", err);
-    } else {
-      console.log("Courses fetched:", results);
-    }
-    callback(err, results);
-  });
+const getCourses = async () => {
+  try {
+    const query = `
+      SELECT 
+        course_code, 
+        course_name, 
+        course_campus, 
+        course_mode, 
+        COALESCE(pre_requisite, 'None') AS prerequisites,
+        semester 
+      FROM courses
+    `;
+    return await queryAsync(query);
+  } catch (err) {
+    console.error("❌ Error fetching courses:", err);
+    throw err;
+  }
 };
 
 const registerCourseInDB = (studentId, courseCode, semester, year, callback) => {
-  const start = Date.now();
-  const query = 'INSERT INTO registrations (student_id, course_code, semester, year, status) VALUES (?, ?, ?, ?, ?)';
-  enrolSystemDb.query(query, [studentId, courseCode, semester, year, 'active'], (err, result) => {
-    const end = Date.now();
-    console.log(`registerCourseInDB query took ${end - start}ms`);
+  // Fetch course details first
+  const courseQuery = 'SELECT course_name, course_campus, course_mode FROM courses WHERE course_code = ?';
+  enrolSystemDb.query(courseQuery, [courseCode], (err, courseDetails) => {
     if (err) {
-      console.error("Error registering course:", err);
-    } else {
-      console.log("Course registered:", result);
+      console.error("Error fetching course details:", err);
+      return callback(err, null);
     }
-    callback(err, result);
+
+    if (courseDetails.length === 0) {
+      console.error("Course not found:", courseCode);
+      return callback(new Error("Course not found"), null);
+    }
+
+    const { course_name, course_campus, course_mode } = courseDetails[0];
+    
+    // Now insert into the registrations table with the fetched course details
+    const query = `INSERT INTO registrations (student_id, course_code, semester, year, status, course_name, course_campus, course_mode) 
+                   VALUES (?, ?, ?, ?, 'active', ?, ?, ?)`;
+
+    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode], (err, result) => {
+      if (err) {
+        console.error("Error registering course:", err);
+        return callback(err, null);
+      }
+      console.log("Course registered successfully:", result);
+      callback(null, result);
+    });
   });
 };
+
 
 const getActiveRegistrationsFromDB = (studentId, callback) => {
   const start = Date.now();
@@ -75,6 +98,29 @@ const getCompletedCoursesFromDB = (studentId, callback) => {
   });
 };
 
+const getCoursePrerequisitesFromDB = (callback) => {
+  const query = `
+    SELECT 
+      course_id, 
+      course_code, 
+      course_name, 
+      COALESCE(pre_requisite, 'None') AS pre_requisite, -- Handle NULL prerequisites
+      course_campus, 
+      course_mode, 
+      semester
+    FROM courses
+  `;
+
+  enrolSystemDb.query(query, (err, results) => {
+    if (err) {
+      console.error("❌ Error fetching course prerequisites:", err);
+      return callback(err, null);
+    }
+    console.log("✅ Course Prerequisites Query Results:", results);
+    callback(null, results);
+  });
+};
+
 const checkPrerequisites = (studentId, courseCode, callback) => {
   const query = `
     SELECT prereq.course_code AS prereq_code
@@ -82,7 +128,7 @@ const checkPrerequisites = (studentId, courseCode, callback) => {
     LEFT JOIN grades g ON prereq.prereq_code = g.course_code AND g.student_id = ?
     WHERE prereq.course_code = ? AND (g.grade IS NULL OR g.grade IN ("D", "E", "F"))
   `;
-  enrolSystemDb.query(query, [studentId, courseCode], (err, results) => {
+  gradesDb.query(query, [studentId, courseCode], (err, results) => {
     if (err) {
       console.error("Error checking prerequisites:", err);
       callback(err, null);
@@ -99,5 +145,6 @@ module.exports = {
   getActiveRegistrationsFromDB,
   getDroppedRegistrationsFromDB,
   getCompletedCoursesFromDB,
-  checkPrerequisites
+  checkPrerequisites,
+  getCoursePrerequisitesFromDB
 };

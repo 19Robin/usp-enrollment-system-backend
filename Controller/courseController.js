@@ -1,4 +1,4 @@
-const { getCourses, registerCourseInDB, getActiveRegistrationsFromDB, getDroppedRegistrationsFromDB, getCompletedCoursesFromDB, checkPrerequisites } = require('../Model/courseModel');
+const { getCourses, registerCourseInDB, getActiveRegistrationsFromDB, getDroppedRegistrationsFromDB, getCompletedCoursesFromDB, getCoursePrerequisitesFromDB} = require('../Model/courseModel');
 
 const getCoursesHandler = async (req, res) => {
   try {
@@ -11,43 +11,40 @@ const getCoursesHandler = async (req, res) => {
         }
       });
     });
+
+    console.log("✅ API Response - Full Courses Data:", JSON.stringify(courses, null, 2)); // ✅ Debugging
+
     res.status(200).json(courses);
   } catch (error) {
+    console.error("❌ Failed to fetch courses:", error);
     res.status(500).json({ error: "Failed to fetch courses" });
   }
 };
 
+
 const registerCourseHandler = async (req, res) => {
   const { studentId, courseCode, semester, year } = req.body;
+
   try {
-    const missingPrereqs = await new Promise((resolve, reject) => {
-      checkPrerequisites(studentId, courseCode, (err, prereqs) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(prereqs);
-        }
+      // Directly register the course in the database
+      const result = await new Promise((resolve, reject) => {
+          registerCourseInDB(studentId, courseCode, semester, year, (err, result) => {
+              if (err) return reject(err);
+              resolve(result);
+          });
       });
-    });
 
-    if (missingPrereqs.length > 0) {
-      return res.status(400).json({ error: `Missing prerequisites: ${missingPrereqs.join(", ")}` });
-    }
-
-    await new Promise((resolve, reject) => {
-      registerCourseInDB(studentId, courseCode, semester, year, (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    res.status(200).json({ message: "Course registered successfully" });
+      if (result.affectedRows > 0) {
+          res.status(200).json({ message: "Course registered successfully" });
+      } else {
+          res.status(400).json({ error: "Course registration failed" });
+      }
   } catch (error) {
-    res.status(500).json({ error: "Failed to register course" });
+      console.error("Error registering course:", error);
+      res.status(500).json({ error: "Failed to register course" });
   }
 };
+
 
 const getActiveRegistrations = async (req, res) => {
   const { studentId } = req.query;
@@ -103,10 +100,28 @@ const getCompletedCourses = async (req, res) => {
   }
 };
 
+const getCoursePrerequisites = async (req, res) => {
+  try {
+    const courses = await new Promise((resolve, reject) => {
+      getCoursePrerequisitesFromDB((err, results) => {
+        if (err) return reject(err);
+        resolve(results);
+      });
+    });
+
+    console.log("✅ Fetched Course Prerequisites:", courses);
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error("❌ Failed to fetch course prerequisites:", error);
+    res.status(500).json({ error: "Failed to fetch course prerequisites" });
+  }
+};
+
 module.exports = {
   getCourses: getCoursesHandler,
   registerCourse: registerCourseHandler,
   getActiveRegistrations,
   getDroppedRegistrations,
   getCompletedCourses,
+  getCoursePrerequisites
 };
