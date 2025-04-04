@@ -9,9 +9,7 @@ const courseRoutes = require("./Routes/courseRoutes");
 const financeRoutes = require("./Routes/financeRoutes");
 const programRoutes = require("./Routes/programRoutes");
 const holdRoutes = require("./Routes/holdsRoutes");
-const financeRoutes = require("./Routes/financeRoutes");
 const programCourseRoutes = require("./Routes/programCourseRoutes");
-const holdRoutes = require("./Routes/holdsRoutes");
 const gradesRoutes = require("./Routes/gradesRoutes"); // Add this line
 
 const app = express();

@@ -5,10 +5,10 @@ const fs = require('fs');
 //   host: process.env.DB_HOST || '127.0.0.1',
 //   port: process.env.DB_PORT || 3306,
 //   user: process.env.DB_USER || 'root',
-//   password: process.env.DB_PASSWORD || 'Prima@2025',
-//   database: process.env.DB_NAME_ENROL || 'usp_enrol_system',
+//   password: process.env.DB_PASSWORD || '8888',
+//   database: process.env.DB_NAME_ENROL || 'usp_enrol',
 // });
-
+////////////////////////////////LANA DB
 const enrolSystemDb = mysql.createConnection({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
   port: process.env.DB_PORT || 4000,
@@ -28,6 +28,8 @@ const enrolSystemDb = mysql.createConnection({
 //   database: process.env.DB_NAME_GRADES || 'usp_grades',
 // });
 
+//////////////////////////////lana db
+
 const gradesDb = mysql.createConnection({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
   port: process.env.DB_PORT || 4000,
@@ -43,9 +45,13 @@ const gradesDb = mysql.createConnection({
 //   host: process.env.DB_HOST || '127.0.0.1',
 //   port: process.env.DB_PORT || 3306,
 //   user: process.env.DB_USER || 'root',
-//   password: process.env.DB_PASSWORD || 'Prima@2025',
+//   password: process.env.DB_PASSWORD || '8888',
 //   database: process.env.DB_NAME_FINANCE || 'usp_finance',
 // });
+
+
+///////////////////////////////////lana DB
+
 
 const financeDb = mysql.createConnection({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
@@ -83,4 +89,4 @@ gradesDb.connect((err) => {
   }
 });
 
-module.exports = {enrolSystemDb, financeDb,  gradesDb};
+module.exports = {enrolSystemDb, financeDb, gradesDb};

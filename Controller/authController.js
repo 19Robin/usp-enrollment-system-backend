@@ -41,8 +41,15 @@ const loginAttemptHandler = async (req, res) => {
       return res.status(401).json({ details: errorCodes.INVALID_CREDENTIALS });
     }
 
+    console.log("JWT Payload:", { 
+      userId: user.student_id || user.manager_id, 
+      username: user.first_name,
+      role: user.role 
+    });
+
     // Generate JWT token
-    const token = jwt.sign({ userId: user.user_id || user.manager_id, role: user.role }, process.env.JWT_SECRET, {
+    // change user_id to user.student_id or user.manager_id based on the role
+    const token = jwt.sign({ userId: user.student_id || user.manager_id, username: user.first_name, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 

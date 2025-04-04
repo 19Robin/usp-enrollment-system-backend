@@ -3,7 +3,8 @@ const { getStudentProfileById,updateStudentProfile  } = require('../Model/studen
 const errorCodes = require('./errorCodes');
 
 const getStudentProfileHandler = async (req, res) => {
-  const { studentId } = req.params;
+  const  studentId  = req.user.userId;
+  console.log("Extracted Student ID from Token:", studentId); 
 
   try {
     const studentProfile = await new Promise((resolve, reject) => {
@@ -20,7 +21,18 @@ const getStudentProfileHandler = async (req, res) => {
       return res.status(404).json({ details: errorCodes.INVALID_CREDENTIALS });
     }
 
-    res.status(200).json(studentProfile);
+    res.status(200).json({
+      success: true,
+      user:{
+        
+        data: {
+          studentProfile
+        },
+        message: "Student Profile Retrieved Successfully"
+
+      }
+  
+    });
   } catch (error) {
     console.error("Error fetching student profile:", error);
     res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
