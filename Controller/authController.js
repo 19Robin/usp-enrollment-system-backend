@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById, getManagerById } = require("../Model/userModel");
 const errorCodes = require("./errorCodes");
+const {createLoginHistory, updateLogoutTime} = require("../Model/loginHistory");
+
 
 const loginAttemptHandler = async (req, res) => {
   const { userId, password } = req.body;
@@ -45,6 +47,18 @@ const loginAttemptHandler = async (req, res) => {
       expiresIn: "1h",
     });
 
+    // Attempt to store login history
+    const ip = req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+    const deviceInfo = req.headers["user-agent"];
+    //Save user login history
+    createLoginHistory(userId, ip, deviceInfo, (err, result) => {
+      if (err) {
+        console.error("Error saving login history:", err);
+      } else {
+        console.log("Login history saved successfully:", result);
+      }
+    });
+
     res.status(200).json({
       message: "Login successful",
       token: token,
@@ -56,6 +70,32 @@ const loginAttemptHandler = async (req, res) => {
   }
 };
 
+// Handle logout attempt
+const logoutHandler = async (req, res) => {
+  const { login_history_id } = req.body;
+
+  try {
+    // Update the logout time in login history
+    updateLogoutTime(login_history_id, (err, result) => {
+      if (err) {
+        return res.status(500).json({ details: "Error updating logout time" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ details: "Login history not found" });
+      }
+
+      res.status(200).json({ message: "Logout successful" });
+    });
+  } catch (error) {
+    console.error("Error during logout process:", error);
+    res.status(500).json({ details: { message: "Logout failed" } });
+  }
+};
+
 module.exports = {
   loginAttempt: loginAttemptHandler,
+  logoutHandler: logoutHandler,
 };
+
+//console.log(loginHistory); // Add this to check if the model is correctly imported
