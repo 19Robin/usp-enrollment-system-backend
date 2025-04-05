@@ -21,3 +21,4 @@ const getHoldStatus = (studentId, res) => {
 };
 
 module.exports = { getHoldStatus };
+

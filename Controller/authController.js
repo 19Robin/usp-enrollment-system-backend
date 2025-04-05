@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById, getManagerById } = require("../Model/userModel");
 const errorCodes = require("./errorCodes");
+require("dotenv").config();
 
 const loginAttemptHandler = async (req, res) => {
   const { userId, password } = req.body;
@@ -40,14 +41,22 @@ const loginAttemptHandler = async (req, res) => {
       return res.status(401).json({ details: errorCodes.INVALID_CREDENTIALS });
     }
 
+    console.log("JWT Payload:", { 
+      userId: user.student_id || user.manager_id, 
+      username: user.first_name,
+      role: user.role 
+    });
+
     // Generate JWT token
-    const token = jwt.sign({ userId: user.user_id || user.manager_id, role: user.role }, process.env.JWT_SECRET, {
+    // change user_id to user.student_id or user.manager_id based on the role
+    const token = jwt.sign({ userId: user.student_id || user.manager_id, username: user.first_name, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
     res.status(200).json({
       success: true,
       message: "Login successful",
+      success: true,
       token: token,
       role: "student",
     });
