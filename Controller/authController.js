@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById, getManagerById, getRoleById} = require("../Model/userModel");
 const errorCodes = require("./errorCodes");
+const {createLoginHistory, updateLogoutTime} = require("../Model/loginHistory");
+
 const { get } = require("mongoose");
 require("dotenv").config();
 
@@ -81,6 +83,7 @@ const loginAttemptHandler = async (req, res) => {
       message: "Login successful",
       success: true,
       token: token,
+      role: "student",
       role: role.role_name,
     });
   } catch (error) {
