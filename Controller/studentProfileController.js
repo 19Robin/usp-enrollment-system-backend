@@ -4,7 +4,7 @@ const errorCodes = require('./errorCodes');
 
 const getStudentProfileHandler = async (req, res) => {
   const  studentId  = req.user.userId;
-  console.log("Extracted Student ID from Token:", studentId); 
+  console.log("Extracted User ID from Token:", studentId); 
 
   try {
     const studentProfile = await new Promise((resolve, reject) => {

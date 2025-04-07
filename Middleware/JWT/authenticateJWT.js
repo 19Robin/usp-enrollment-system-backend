@@ -18,12 +18,17 @@ const authenticateUserJWT = (req, res, next) => {
     const token = authHeader.split(" ")[1];
     try {
       const user = verifyToken(token);
-      console.log("User:", user);
+      console.log({
+        Valid: true,
+        User: user
+      });
       req.user = user;
       next();
     } catch (err) {
       console.error("Invalid or expired token:", err);
-      return res.sendStatus(403); // Forbidden
+      return res.status(403).json({
+        message: "Invalid or expired token"
+      });
     }
   } else {
     res.sendStatus(401); // Unauthorized
