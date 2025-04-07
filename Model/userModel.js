@@ -28,7 +28,42 @@ const getManagerById = (managerId, callback) => {
   });
 };
 
+getManagerProfilebyId = (managerId, callback) => {
+  const query = `
+    SELECT manager_id, first_name, last_name, email, phone
+    FROM managers
+    WHERE manager_id = ?
+  `;
+  enrolSystemDb.query(query, [managerId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    if (results.length > 0) {
+      return callback(null, results[0]);
+    } else {
+      return callback(null, null);
+    }
+  });
+};
+
+const getRoleById = (roleId, callback) => {
+  const query = 'SELECT * FROM roles WHERE role_id = ?';
+  enrolSystemDb.query(query, [roleId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    if (results.length > 0) {
+      return callback(null, results[0]);
+    } else {
+      return callback(null, null);
+    }
+  });
+};
+
+
 module.exports = {
   getStudentById,
   getManagerById,
+  getManagerProfilebyId,
+  getRoleById
 };

@@ -1,8 +1,9 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\authController.js
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { getStudentById, getManagerById } = require("../Model/userModel");
+const { getStudentById, getManagerById, getRoleById} = require("../Model/userModel");
 const errorCodes = require("./errorCodes");
+const { get } = require("mongoose");
 require("dotenv").config();
 
 const loginAttemptHandler = async (req, res) => {
@@ -36,6 +37,16 @@ const loginAttemptHandler = async (req, res) => {
       return res.status(401).json({ details: errorCodes.INVALID_CREDENTIALS });
     }
 
+    const role = await new Promise((resolve, reject) => {
+      getRoleById(user.role_id, (err, role) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(role);
+        }
+      });
+    });
+
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ details: errorCodes.INVALID_CREDENTIALS });
@@ -44,12 +55,12 @@ const loginAttemptHandler = async (req, res) => {
     console.log("JWT Payload:", { 
       userId: user.student_id || user.manager_id, 
       username: user.first_name,
-      role: user.role 
+      role: role.role_name 
     });
 
     // Generate JWT token
     // change user_id to user.student_id or user.manager_id based on the role
-    const token = jwt.sign({ userId: user.student_id || user.manager_id, username: user.first_name, role: user.role }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ userId: user.student_id || user.manager_id, username: user.first_name, role: role.role_name }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -57,7 +68,7 @@ const loginAttemptHandler = async (req, res) => {
       message: "Login successful",
       success: true,
       token: token,
-      role: user.role,
+      role: role.role_name,
     });
   } catch (error) {
     console.error("Error during login process:", error);
