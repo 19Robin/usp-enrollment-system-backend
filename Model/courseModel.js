@@ -1,8 +1,9 @@
 const { enrolSystemDb, gradesDb } = require('../db');
 const util = require('util');
 const queryAsync = util.promisify(enrolSystemDb.query).bind(enrolSystemDb);
+const AppError = require('../appError');
 
-const getCourses = async () => {
+const getCourses = async (next) => {
   try {
     const query = `
       SELECT 
@@ -17,22 +18,23 @@ const getCourses = async () => {
     return await queryAsync(query);
   } catch (err) {
     console.error("❌ Error fetching courses:", err);
-    throw err;
+    return next(new AppError('DB_ERROR', 'Course Database query failed.', 500)); // Pass the error to the error middleware
   }
 };
 
-const registerCourseInDB = (studentId, courseCode, semester, year, callback) => {
+const registerCourseInDB = (studentId, courseCode, semester, year, callback, next) => {
   // Fetch course details first
   const courseQuery = 'SELECT course_name, course_campus, course_mode FROM courses WHERE course_code = ?';
   enrolSystemDb.query(courseQuery, [courseCode], (err, courseDetails) => {
     if (err) {
       console.error("Error fetching course details:", err);
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
 
     if (courseDetails.length === 0) {
-      console.error("Course not found:", courseCode);
-      return callback(new Error("Course not found"), null);
+      const error = new Error("Course not found");
+      error.status = 404; // Not Found
+      return next(error); // Pass the error to the error middleware
     }
 
     const { course_name, course_campus, course_mode } = courseDetails[0];
@@ -44,7 +46,7 @@ const registerCourseInDB = (studentId, courseCode, semester, year, callback) => 
     enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode], (err, result) => {
       if (err) {
         console.error("Error registering course:", err);
-        return callback(err, null);
+        return next(err); // Pass the error to the error middleware
       }
       console.log("Course registered successfully:", result);
       callback(null, result);
@@ -53,7 +55,7 @@ const registerCourseInDB = (studentId, courseCode, semester, year, callback) => 
 };
 
 
-const getActiveRegistrationsFromDB = (studentId, callback) => {
+const getActiveRegistrationsFromDB = (studentId, callback, next) => {
   const start = Date.now();
   const query = 'SELECT * FROM registrations WHERE student_id = ?';
   enrolSystemDb.query(query, [studentId], (err, results) => {
@@ -61,6 +63,7 @@ const getActiveRegistrationsFromDB = (studentId, callback) => {
     console.log(`getActiveRegistrationsFromDB query took ${end - start}ms`);
     if (err) {
       console.error("Error fetching active registrations:", err);
+      return next(err); // Pass the error to the error middleware
     } else {
       console.log("Active registrations fetched:", results);
     }
@@ -68,7 +71,7 @@ const getActiveRegistrationsFromDB = (studentId, callback) => {
   });
 };
 
-const getDroppedRegistrationsFromDB = (studentId, callback) => {
+const getDroppedRegistrationsFromDB = (studentId, callback, next) => {
   const start = Date.now();
   const query = 'SELECT * FROM registrations WHERE student_id = ? AND status = "withdrawn"';
   enrolSystemDb.query(query, [studentId], (err, results) => {
@@ -76,6 +79,7 @@ const getDroppedRegistrationsFromDB = (studentId, callback) => {
     console.log(`getDroppedRegistrationsFromDB query took ${end - start}ms`);
     if (err) {
       console.error("Error fetching dropped registrations:", err);
+      return next(err); // Pass the error to the error middleware
     } else {
       console.log("Dropped registrations fetched:", results);
     }
@@ -83,7 +87,7 @@ const getDroppedRegistrationsFromDB = (studentId, callback) => {
   });
 };
 
-const getCompletedCoursesFromDB = (studentId, callback) => {
+const getCompletedCoursesFromDB = (studentId, callback, next) => {
   const start = Date.now();
   const query = 'SELECT course_code FROM grades WHERE student_id = ? AND grade NOT IN ("D", "E", "F")';
   gradesDb.query(query, [studentId], (err, results) => {
@@ -91,6 +95,7 @@ const getCompletedCoursesFromDB = (studentId, callback) => {
     console.log(`getCompletedCoursesFromDB query took ${end - start}ms`);
     if (err) {
       console.error("Error fetching completed courses:", err);
+      return next(err); // Pass the error to the error middleware
     } else {
       console.log("Completed courses fetched:", results);
     }
@@ -98,7 +103,7 @@ const getCompletedCoursesFromDB = (studentId, callback) => {
   });
 };
 
-const getCoursePrerequisitesFromDB = (callback) => {
+const getCoursePrerequisitesFromDB = (callback, next) => {
   const query = `
     SELECT 
       course_id, 
@@ -114,14 +119,14 @@ const getCoursePrerequisitesFromDB = (callback) => {
   enrolSystemDb.query(query, (err, results) => {
     if (err) {
       console.error("❌ Error fetching course prerequisites:", err);
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
     console.log("✅ Course Prerequisites Query Results:", results);
     callback(null, results);
   });
 };
 
-const checkPrerequisites = (studentId, courseCode, callback) => {
+const checkPrerequisites = (studentId, courseCode, callback, next) => {
   const query = `
     SELECT prereq.course_code AS prereq_code
     FROM prerequisites prereq
@@ -131,7 +136,7 @@ const checkPrerequisites = (studentId, courseCode, callback) => {
   gradesDb.query(query, [studentId, courseCode], (err, results) => {
     if (err) {
       console.error("Error checking prerequisites:", err);
-      callback(err, null);
+      return next(err); // Pass the error to the error middleware
     } else {
       const missingPrereqs = results.map(row => row.prereq_code);
       callback(null, missingPrereqs);

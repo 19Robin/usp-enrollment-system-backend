@@ -1,6 +1,7 @@
 const { getCompletedCoursesFromDB } = require('../Model/gradesModel');
+const AppError = require("../appError");
 
-const getCompletedCourses = async (req, res) => {
+const getCompletedCourses = async (req, res, next) => {
   const { studentId } = req.query;
   try {
     const completedCourses = await new Promise((resolve, reject) => {
@@ -15,7 +16,8 @@ const getCompletedCourses = async (req, res) => {
     res.status(200).json(completedCourses);
   } catch (error) {
     console.error("Error fetching completed courses:", error);
-    res.status(500).json({ error: "Failed to fetch completed courses" });
+    //res.status(500).json({ error: "Failed to fetch completed courses" });
+    next(new AppError("DB_ERROR", "Error fetching completed courses", 500));
   }
 };
 

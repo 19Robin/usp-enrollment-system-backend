@@ -1,8 +1,9 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\studentProfileController.js
 const { getStudentProfileById,updateStudentProfile  } = require('../Model/studentProfileModel');
 const errorCodes = require('./errorCodes');
+const AppError = require("../appError");  
 
-const getStudentProfileHandler = async (req, res) => {
+const getStudentProfileHandler = async (req, res, next) => {
   const  studentId  = req.user.userId;
   console.log("Extracted User ID from Token:", studentId); 
 
@@ -35,7 +36,8 @@ const getStudentProfileHandler = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching student profile:", error);
-    res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
+    //res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
+    next(new AppError("DB_ERROR", "Error fetching student profile", 500));
   }
 };
 

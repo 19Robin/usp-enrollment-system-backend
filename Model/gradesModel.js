@@ -1,12 +1,12 @@
 const { gradesDb, enrolSystemDb } = require('../db');
 
-const getCompletedCoursesFromDB = (studentId, callback) => {
+const getCompletedCoursesFromDB = (studentId, callback, next) => {
   const gradesQuery = 'SELECT term, course_code AS CourseID, grade FROM grades WHERE student_id = ?';
 
   gradesDb.query(gradesQuery, [studentId], (err, gradesResults) => {
     if (err) {
       console.error("Error fetching grades:", err);
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
 
     const courseCodes = gradesResults.map(grade => grade.CourseID);
@@ -18,7 +18,7 @@ const getCompletedCoursesFromDB = (studentId, callback) => {
     enrolSystemDb.query(coursesQuery, [courseCodes], (err, coursesResults) => {
       if (err) {
         console.error("Error fetching courses:", err);
-        return callback(err, null);
+        return next(err); // Pass the error to the error middleware
       }
 
       const coursesMap = coursesResults.reduce((acc, course) => {

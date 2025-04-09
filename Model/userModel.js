@@ -1,10 +1,10 @@
 const { enrolSystemDb } = require('../db');
 
-const getStudentById = (studentId, callback) => {
+const getStudentById = (studentId, callback, next) => {
   const query = 'SELECT * FROM students WHERE student_id = ?';
   enrolSystemDb.query(query, [studentId], (err, results) => {
     if (err) {
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
     if (results.length > 0) {
       return callback(null, results[0]);
@@ -14,11 +14,11 @@ const getStudentById = (studentId, callback) => {
   });
 };
 
-const getManagerById = (managerId, callback) => {
+const getManagerById = (managerId, callback, next) => {
   const query = 'SELECT * FROM managers WHERE manager_id = ?';
   enrolSystemDb.query(query, [managerId], (err, results) => {
     if (err) {
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
     if (results.length > 0) {
       return callback(null, results[0]);
@@ -28,7 +28,7 @@ const getManagerById = (managerId, callback) => {
   });
 };
 
-getManagerProfilebyId = (managerId, callback) => {
+getManagerProfilebyId = (managerId, callback,next) => {
   const query = `
     SELECT manager_id, first_name, last_name, email, phone
     FROM managers
@@ -36,7 +36,7 @@ getManagerProfilebyId = (managerId, callback) => {
   `;
   enrolSystemDb.query(query, [managerId], (err, results) => {
     if (err) {
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
     if (results.length > 0) {
       return callback(null, results[0]);
@@ -46,11 +46,11 @@ getManagerProfilebyId = (managerId, callback) => {
   });
 };
 
-const getRoleById = (roleId, callback) => {
+const getRoleById = (roleId, callback, next) => {
   const query = 'SELECT * FROM roles WHERE role_id = ?';
   enrolSystemDb.query(query, [roleId], (err, results) => {
     if (err) {
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
     if (results.length > 0) {
       return callback(null, results[0]);
