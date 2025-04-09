@@ -10,7 +10,9 @@ const financeRoutes = require("./Routes/financeRoutes");
 const programRoutes = require("./Routes/programRoutes");
 const holdRoutes = require("./Routes/holdsRoutes");
 const programCourseRoutes = require("./Routes/programCourseRoutes");
-const gradesRoutes = require("./Routes/gradesRoutes"); // Add this line
+const gradesRoutes = require("./Routes/gradesRoutes"); 
+const stripeRoutes = require("./Routes/stripeRoutes");
+const webhookRoutes = require("./Routes/stripeWebhooks");
 
 const app = express();
 
@@ -29,7 +31,9 @@ app.use("/api", programRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/holds", holdRoutes);
 app.use("/api", programCourseRoutes);
-app.use("/api", gradesRoutes); // Add this line
+app.use("/api", gradesRoutes); 
+app.use("/api/stripe", stripeRoutes); 
+app.use("/api/stripe/webhooks", webhookRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

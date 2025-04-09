@@ -60,10 +60,25 @@ const getRoleById = (roleId, callback) => {
   });
 };
 
+const updateStripeId = (studentId, stripeId, callback) => {
+  const query = 'UPDATE students SET stripe_id = ? WHERE student_id = ?';
+  enrolSystemDb.query(query, [stripeId, studentId], (err, results) => {
+    if (err) {
+      return callback(err, null);
+    }
+    if (results.affectedRows > 0) {
+      return callback(null, results);
+    } else {
+      return callback(null, false);
+    }
+  });
+};
+
 
 module.exports = {
   getStudentById,
   getManagerById,
   getManagerProfilebyId,
-  getRoleById
+  getRoleById,
+  updateStripeId
 };

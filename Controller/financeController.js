@@ -1,4 +1,4 @@
-const { getFinanceData, getInvoicesById } = require("../Model/financeModel");
+const { getFinanceData, getInvoicesById, updatePayments } = require("../Model/financeModel");
 
 const getFinanceDataHandler = async (req, res) => {
     const { category, userID } = req.params;
@@ -27,7 +27,9 @@ const getInvoicesByIdHandler = async (req, res) => {
                 message: "Invoices Retrieved Successfully",
                 data: {
                     invoices: result.courses,
-                    total: result.total
+                    total: result.total,
+                    totalPaid: result.totalPaid,
+                    totalPayable: result.payableAmount
                 }
             });
     
@@ -43,7 +45,32 @@ const getInvoicesByIdHandler = async (req, res) => {
    
 };
 
+const updatePaymentsHandler = async (req, res) => {
+    console.log("Request body:", req.body);
+
+    const { customer_id, transaction_id, amount_paid, status, currency, payment_method, created_at } = req.body;
+    
+
+    try {
+        const result = await new Promise((resolve, reject) => {
+            updatePayments(customer_id, transaction_id, amount_paid, status, currency, payment_method, created_at, (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve(result);
+            });
+        });
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+        console.error("Error updating payments:", error);
+        return res.status(500).json({ error: 'Failed to update payments', details: error });
+    }
+};
+
 module.exports = {
     getFinanceDataHandler,
-    getInvoicesByIdHandler
+    getInvoicesByIdHandler,
+    updatePaymentsHandler
 };

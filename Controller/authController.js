@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById, getManagerById, getRoleById} = require("../Model/userModel");
 const errorCodes = require("./errorCodes");
-const { get } = require("mongoose");
 require("dotenv").config();
 
 const loginAttemptHandler = async (req, res) => {
