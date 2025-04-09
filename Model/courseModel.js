@@ -21,9 +21,8 @@ const getCourses = async () => {
   }
 };
 
-const registerCourseInDB = (studentId, courseCode, semester, year, callback) => {
-  // Fetch course details first
-  const courseQuery = 'SELECT course_name, course_campus, course_mode FROM courses WHERE course_code = ?';
+const registerCourseInDB = (studentId, courseCode, semester, year, req, callback) => {
+  const courseQuery = 'SELECT course_name, course_campus, course_mode, course_id FROM courses WHERE course_code = ?';
   enrolSystemDb.query(courseQuery, [courseCode], (err, courseDetails) => {
     if (err) {
       console.error("Error fetching course details:", err);
@@ -35,13 +34,24 @@ const registerCourseInDB = (studentId, courseCode, semester, year, callback) => 
       return callback(new Error("Course not found"), null);
     }
 
-    const { course_name, course_campus, course_mode } = courseDetails[0];
-    
-    // Now insert into the registrations table with the fetched course details
-    const query = `INSERT INTO registrations (student_id, course_code, semester, year, status, course_name, course_campus, course_mode) 
-                   VALUES (?, ?, ?, ?, 'active', ?, ?, ?)`;
+    const { course_name, course_campus, course_mode, course_id } = courseDetails[0];
 
-    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode], (err, result) => {
+    // Extract timezone offset from the request headers
+    const timezoneOffset = parseInt(req.headers['x-timezone-offset'] || 0); // Default to UTC if not provided
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - timezoneOffset); // Adjust to the client's local time
+
+    const reg_date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; // YYYY-MM-DD
+    const reg_time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`; // HH:MM:SS
+
+    // Insert into the registrations table with the fetched course details
+    const query = `
+      INSERT INTO registrations 
+      (student_id, course_code, semester, year, status, course_name, course_campus, course_mode, course_id, reg_date, reg_time) 
+      VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)
+    `;
+
+    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode, course_id, reg_date, reg_time], (err, result) => {
       if (err) {
         console.error("Error registering course:", err);
         return callback(err, null);
@@ -55,7 +65,7 @@ const registerCourseInDB = (studentId, courseCode, semester, year, callback) => 
 
 const getActiveRegistrationsFromDB = (studentId, callback) => {
   const start = Date.now();
-  const query = 'SELECT * FROM registrations WHERE student_id = ?';
+  const query = 'SELECT * FROM registrations WHERE student_id = ? AND status = "active"';
   enrolSystemDb.query(query, [studentId], (err, results) => {
     const end = Date.now();
     console.log(`getActiveRegistrationsFromDB query took ${end - start}ms`);
@@ -70,7 +80,7 @@ const getActiveRegistrationsFromDB = (studentId, callback) => {
 
 const getDroppedRegistrationsFromDB = (studentId, callback) => {
   const start = Date.now();
-  const query = 'SELECT * FROM registrations WHERE student_id = ? AND status = "withdrawn"';
+  const query = 'SELECT * FROM registrations WHERE student_id = ? AND status = "cancelled"';
   enrolSystemDb.query(query, [studentId], (err, results) => {
     const end = Date.now();
     console.log(`getDroppedRegistrationsFromDB query took ${end - start}ms`);
@@ -80,6 +90,31 @@ const getDroppedRegistrationsFromDB = (studentId, callback) => {
       console.log("Dropped registrations fetched:", results);
     }
     callback(err, results);
+  });
+};
+
+const cancelCourseRegistration = (studentId, courseCode, req, callback) => {
+  // Extract timezone offset from the request headers
+  const timezoneOffset = parseInt(req.headers['x-timezone-offset'] || 0); // Default to UTC if not provided
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - timezoneOffset); // Adjust to the client's local time
+
+  const cancelReg_date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; // YYYY-MM-DD
+  const cancelReg_time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`; // HH:MM:SS
+
+  const query = `
+    UPDATE registrations 
+    SET status = 'cancelled', cancelReg_date = ?, cancelReg_time = ? 
+    WHERE student_id = ? AND course_code = ? AND status = 'active'
+  `;
+
+  enrolSystemDb.query(query, [cancelReg_date, cancelReg_time, studentId, courseCode], (err, result) => {
+    if (err) {
+      console.error("Error canceling course registration:", err);
+      return callback(err, null);
+    }
+    console.log("Course registration canceled successfully:", result);
+    callback(null, result);
   });
 };
 
@@ -142,6 +177,7 @@ const checkPrerequisites = (studentId, courseCode, callback) => {
 module.exports = {
   getCourses,
   registerCourseInDB,
+  cancelCourseRegistration,
   getActiveRegistrationsFromDB,
   getDroppedRegistrationsFromDB,
   getCompletedCoursesFromDB,

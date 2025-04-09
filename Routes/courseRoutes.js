@@ -1,5 +1,5 @@
 const express = require("express");
-const { getCourses, registerCourse, getActiveRegistrations, getDroppedRegistrations, getCoursePrerequisites } = require("../Controller/courseController");
+const { getCourses, registerCourse, cancelCourse, getActiveRegistrations, getDroppedRegistrations, getCoursePrerequisites } = require("../Controller/courseController");
 const router = express.Router();
 
 // Define the route to get courses
@@ -10,6 +10,8 @@ router.get("/course-prerequisites", getCoursePrerequisites);
 
 // Define the route to register a course
 router.post("/registerCourse", registerCourse);
+
+router.post("/cancelCourse", cancelCourse);
 
 // Define the route to get active registrations
 router.get("/active-registrations", getActiveRegistrations);

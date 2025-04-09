@@ -1,4 +1,4 @@
-const { getCourses, registerCourseInDB, getActiveRegistrationsFromDB, getDroppedRegistrationsFromDB, getCompletedCoursesFromDB, getCoursePrerequisitesFromDB} = require('../Model/courseModel');
+const { getCourses, registerCourseInDB, getActiveRegistrationsFromDB, getDroppedRegistrationsFromDB, getCompletedCoursesFromDB, getCoursePrerequisitesFromDB, cancelCourseRegistration} = require('../Model/courseModel');
 
 const getCoursesHandler = async (req, res) => {
   try {
@@ -26,22 +26,43 @@ const registerCourseHandler = async (req, res) => {
   const { studentId, courseCode, semester, year } = req.body;
 
   try {
-      // Directly register the course in the database
-      const result = await new Promise((resolve, reject) => {
-          registerCourseInDB(studentId, courseCode, semester, year, (err, result) => {
-              if (err) return reject(err);
-              resolve(result);
-          });
+    const result = await new Promise((resolve, reject) => {
+      registerCourseInDB(studentId, courseCode, semester, year, req, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
       });
+    });
 
-      if (result.affectedRows > 0) {
-          res.status(200).json({ message: "Course registered successfully" });
-      } else {
-          res.status(400).json({ error: "Course registration failed" });
-      }
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Course registered successfully" });
+    } else {
+      res.status(400).json({ error: "Course registration failed" });
+    }
   } catch (error) {
-      console.error("Error registering course:", error);
-      res.status(500).json({ error: "Failed to register course" });
+    console.error("Error registering course:", error);
+    res.status(500).json({ error: "Failed to register course" });
+  }
+};
+
+const cancelCourseHandler = async (req, res) => {
+  const { studentId, courseCode } = req.body;
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      cancelCourseRegistration(studentId, courseCode, req, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Course registration canceled successfully" });
+    } else {
+      res.status(400).json({ error: "Failed to cancel course registration" });
+    }
+  } catch (error) {
+    console.error("Error canceling course registration:", error);
+    res.status(500).json({ error: "Failed to cancel course registration" });
   }
 };
 
@@ -120,6 +141,7 @@ const getCoursePrerequisites = async (req, res) => {
 module.exports = {
   getCourses: getCoursesHandler,
   registerCourse: registerCourseHandler,
+  cancelCourse: cancelCourseHandler,
   getActiveRegistrations,
   getDroppedRegistrations,
   getCompletedCourses,
