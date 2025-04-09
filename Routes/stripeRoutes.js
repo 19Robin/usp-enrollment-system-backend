@@ -56,7 +56,6 @@ router.post('/payment-sheet', auth,  async (req, res) => {
             currency: 'fjd',
             customer: customer.id,
             description: 'Invoice payment',
-            country: 'FJ',
             automatic_payment_methods: {
             enabled: true,
             },
