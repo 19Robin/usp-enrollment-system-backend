@@ -41,17 +41,17 @@ const registerCourseInDB = (studentId, courseCode, semester, year, req, callback
     const now = new Date();
     now.setMinutes(now.getMinutes() - timezoneOffset); // Adjust to the client's local time
 
-    const reg_date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; // YYYY-MM-DD
-    const reg_time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`; // HH:MM:SS
+    const reg_action_date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`; // YYYY-MM-DD
+    const reg_action_time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`; // HH:MM:SS
 
     // Insert into the registrations table with the fetched course details
     const query = `
       INSERT INTO registrations 
-      (student_id, course_code, semester, year, status, course_name, course_campus, course_mode, course_id, reg_date, reg_time) 
+      (student_id, course_code, semester, year, status, course_name, course_campus, course_mode, course_id, reg_action_date, reg_action_time) 
       VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?, ?, ?)
     `;
 
-    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode, course_id, reg_date, reg_time], (err, result) => {
+    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode, course_id, reg_action_date, reg_action_time], (err, result) => {
       if (err) {
         console.error("Error registering course:", err);
         return callback(err, null);
