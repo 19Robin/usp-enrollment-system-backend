@@ -1,17 +1,19 @@
-const { getFinanceData, getInvoicesById, updatePayments, getPaymentsById } = require("../Model/financeModel");
+const { getFinanceData, getInvoicesById } = require("../Model/financeModel");
+const AppError = require("../appError");
 
-const getFinanceDataHandler = async (req, res) => {
+const getFinanceDataHandler = async (req, res, next) => {
     const { category, userID } = req.params;
 
     try {
         await getFinanceData(category, userID, res);
     } catch (error) {
         console.error("Error fetching finance data:", error);
-        res.status(500).json({ error: "Failed to fetch finance data" });
+        //res.status(500).json({ error: "Failed to fetch finance data" });
+        next(new AppError("DB_ERROR", "Error fetching finace data", 500));
     }
 };
 
-const getInvoicesByIdHandler = async (req, res) => {
+const getInvoicesByIdHandler = async (req, res, next) => {
     const studentId = req.user.userId;
     console.log("Extracted User ID from Token:", studentId);
 

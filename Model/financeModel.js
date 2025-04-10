@@ -13,7 +13,7 @@ const getFinanceData = (category, userID, res) => {
             break;
 
         case "sponsorships":
-            query = 'SELECT semester, sponsor  FROM sponsorship WHERE student_id = ?';
+            query = 'SELECT semester, sponsor  FROM sponsorships WHERE student_id = ?';
             break;
 
         case "holds":
