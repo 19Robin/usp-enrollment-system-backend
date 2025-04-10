@@ -23,7 +23,7 @@ const getCourses = async () => {
 
 const registerCourseInDB = (studentId, courseCode, semester, year, callback) => {
   // Fetch course details first
-  const courseQuery = 'SELECT course_name, course_campus, course_mode FROM courses WHERE course_code = ?';
+  const courseQuery = 'SELECT course_name, course_campus, course_mode, course_id FROM courses WHERE course_code = ?';
   enrolSystemDb.query(courseQuery, [courseCode], (err, courseDetails) => {
     if (err) {
       console.error("Error fetching course details:", err);
@@ -35,19 +35,51 @@ const registerCourseInDB = (studentId, courseCode, semester, year, callback) => 
       return callback(new Error("Course not found"), null);
     }
 
-    const { course_name, course_campus, course_mode } = courseDetails[0];
+    const { course_name, course_campus, course_mode, course_id } = courseDetails[0];
     
     // Now insert into the registrations table with the fetched course details
-    const query = `INSERT INTO registrations (student_id, course_code, semester, year, status, course_name, course_campus, course_mode) 
-                   VALUES (?, ?, ?, ?, 'active', ?, ?, ?)`;
+    const query = `INSERT INTO registrations (student_id, course_code, semester, year, status, course_name, course_campus, course_mode, course_id) 
+                   VALUES (?, ?, ?, ?, 'active', ?, ?, ?, ?)`;
 
-    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode], (err, result) => {
+    enrolSystemDb.query(query, [studentId, courseCode, semester, year, course_name, course_campus, course_mode, course_id], (err, result) => {
       if (err) {
         console.error("Error registering course:", err);
         return callback(err, null);
       }
       console.log("Course registered successfully:", result);
       callback(null, result);
+
+      const registrationId = result.insertId;
+
+      const feeQuery = `INSERT INTO fees (fee_type, registration_id) VALUES (?, ?)`;
+  
+      enrolSystemDb.query(feeQuery, ['Tuition fees', registrationId], (err, feeResult) => {
+        if (err) {
+          console.error("Error inserting fee:", err);
+          return callback(err, null);
+        }
+  
+        console.log("Fee inserted successfully:", feeResult);
+        callback(null, feeResult);
+
+
+        const invoiceQuery = `INSERT INTO invoices (student_id, fee_id, due_date) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))`;
+        const feeId = feeResult.insertId;  
+        enrolSystemDb.query(invoiceQuery, [studentId, feeId], (err, invoiceResult) => {
+          if (err) {
+            console.error("Error inserting invoice:", err);
+            return callback(err, null);
+          }
+
+          console.log("Invoice inserted successfully:", invoiceResult);
+          callback(null, invoiceResult);  
+        });
+
+      });
+
+
+
+
     });
   });
 };
