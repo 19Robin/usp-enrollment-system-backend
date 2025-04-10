@@ -1,4 +1,4 @@
-const { getCourses, registerCourseInDB, getActiveRegistrationsFromDB, getDroppedRegistrationsFromDB, getCompletedCoursesFromDB, getCoursePrerequisitesFromDB} = require('../Model/courseModel');
+const { getCourses, registerCourseInDB, cancelCourseRegistration, getActiveRegistrationsFromDB, getDroppedRegistrationsFromDB, getCompletedCoursesFromDB, getCoursePrerequisitesFromDB} = require('../Model/courseModel');
 const AppError = require('../appError');
 
 const getCoursesHandler = async (req, res, next) => {
@@ -35,16 +35,36 @@ const registerCourseHandler = async (req, res, next) => {
       });
     });
 
-      if (result.affectedRows > 0) {
-          res.status(200).json({ message: "Course registered successfully" });
-      } else {
-          //res.status(400).json({ error: "Course registration failed" });
-          next(new AppError('DB_ERROR', 'Course registration failed.', 400)); // Pass the error to the error middleware
-      }
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Course registered successfully" });
+    } else {
+      next(new AppError('DB_ERROR', 'Course registration failed.', 400)); // Pass the error to the error middleware
+    }
   } catch (error) {
-      console.error("Error registering course:", error);
-      //res.status(500).json({ error: "Failed to register course" });
-      next(new AppError('DB_ERROR', 'Course registration failed.', 500)); // Pass the error to the error middleware
+    console.error("Error registering course:", error);
+    next(new AppError('DB_ERROR', 'Course registration failed.', 500)); // Pass the error to the error middleware
+  }
+};
+
+const cancelCourseHandler = async (req, res, next) => {
+  const { studentId, courseCode } = req.body;
+
+  try {
+    const result = await new Promise((resolve, reject) => {
+      cancelCourseRegistration(studentId, courseCode, req, (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: "Course registration canceled successfully" });
+    } else {
+      next(new AppError('DB_ERROR', 'Failed to cancel course registration.', 400)); // Pass the error to the error middleware
+    }
+  } catch (error) {
+    console.error("Error canceling course registration:", error);
+    next(new AppError('DB_ERROR', 'Failed to cancel course registration.', 500)); // Pass the error to the error middleware
   }
 };
 

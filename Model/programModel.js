@@ -1,10 +1,10 @@
 const { enrolSystemDb } = require('../db');
 
-const getPrograms = (callback, next) => {
+const getPrograms = (callback) => {
   const query = 'SELECT * FROM programs';
   enrolSystemDb.query(query, (err, results) => {
     if (err) {
-      return next(err); // Pass the error to the error middleware
+      return callback(err, null);
     }
     return callback(null, results);
   });
