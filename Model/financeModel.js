@@ -46,7 +46,7 @@ const getFinanceData = (category, userID, res) => {
 const getPaymentsById = (studentId, callback) => {
     const query = `
         SELECT *
-        FROM invoices
+        FROM payments
         WHERE student_id = ?
     `;
     enrolSystemDb.query(query, [studentId], (err, results) => {
@@ -54,7 +54,7 @@ const getPaymentsById = (studentId, callback) => {
           return callback(err, null);
         }
         if (results.length > 0) {
-          return callback(null, results[0]);
+          return callback(null, results);
         } else {
           return callback(null, null);
         }
