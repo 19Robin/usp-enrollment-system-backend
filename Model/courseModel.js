@@ -58,6 +58,38 @@ const registerCourseInDB = (studentId, courseCode, semester, year, req, callback
       }
       console.log("Course registered successfully:", result);
       callback(null, result);
+
+      const registrationId = result.insertId;
+
+      const feeQuery = `INSERT INTO fees (fee_type, registration_id) VALUES (?, ?)`;
+  
+      enrolSystemDb.query(feeQuery, ['Tuition fees', registrationId], (err, feeResult) => {
+        if (err) {
+          console.error("Error inserting fee:", err);
+          return callback(err, null);
+        }
+  
+        console.log("Fee inserted successfully:", feeResult);
+        callback(null, feeResult);
+
+
+        const invoiceQuery = `INSERT INTO invoices (student_id, fee_id, due_date) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))`;
+        const feeId = feeResult.insertId;  
+        enrolSystemDb.query(invoiceQuery, [studentId, feeId], (err, invoiceResult) => {
+          if (err) {
+            console.error("Error inserting invoice:", err);
+            return callback(err, null);
+          }
+
+          console.log("Invoice inserted successfully:", invoiceResult);
+          callback(null, invoiceResult);  
+        });
+
+      });
+
+
+
+
     });
   });
 };

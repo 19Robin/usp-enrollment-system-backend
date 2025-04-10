@@ -81,9 +81,7 @@ const loginAttemptHandler = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      success: true,
       token: token,
-      role: "student",
       role: role.role_name,
     });
   } catch (error) {

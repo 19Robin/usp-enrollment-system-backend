@@ -1,4 +1,4 @@
-const { getFinanceData, getInvoicesById, updatePayments } = require("../Model/financeModel");
+const { getFinanceData, getInvoicesById, updatePayments, getPaymentsById } = require("../Model/financeModel");
 
 const getFinanceDataHandler = async (req, res) => {
     const { category, userID } = req.params;
@@ -69,8 +69,45 @@ const updatePaymentsHandler = async (req, res) => {
     }
 };
 
+const getAllPaymentsHandler = async (req, res) => {
+    const studentId = req.user.userId;
+    console.log("Extracted User ID from Token:", studentId);
+
+    try {
+        const studentPayments = await new Promise((resolve, reject) => {
+            getPaymentsById(studentId, (err, results) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(results);
+              }
+            });
+        });
+
+        res.status(200).json({
+            success: true,
+            data:{
+              
+                studentPayments,
+            },
+            message: "Payments Retrieved Successfully"
+      
+        });
+        
+        
+    } catch (error) {
+
+        console.error("Error fetching payments:", error);
+        res.status(500).json({ error: "Failed to fetch payments" });
+        
+    }
+
+   
+}
+
 module.exports = {
     getFinanceDataHandler,
     getInvoicesByIdHandler,
-    updatePaymentsHandler
+    updatePaymentsHandler,
+    getAllPaymentsHandler
 };
