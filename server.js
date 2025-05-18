@@ -18,6 +18,7 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.json()); // Parse JSON bodies (as sent by API clients)
 
 
 
