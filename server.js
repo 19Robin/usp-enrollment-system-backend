@@ -13,7 +13,7 @@ const programCourseRoutes = require("./Routes/programCourseRoutes");
 const gradesRoutes = require("./Routes/gradesRoutes"); 
 const stripeRoutes = require("./Routes/stripeRoutes");
 const webhookRoutes = require("./Routes/stripeWebhooks");
-const applicationsRoutes = require("./Routes/applicationsRoutes");
+const applicationRoutes = require("./Routes/applicationRoutes");
 
 const app = express();
 
@@ -36,7 +36,7 @@ app.use("/api", programCourseRoutes);
 app.use("/api", gradesRoutes); 
 app.use("/api/stripe", stripeRoutes); 
 app.use("/api/stripe/webhooks", webhookRoutes);
-app.use("/api/applications", applicationsRoutes); 
+app.use("/api/applications", applicationRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

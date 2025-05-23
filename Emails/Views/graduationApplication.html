@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completion of Program Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .email-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .email-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .email-body {
+            padding: 20px 0;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .email-footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #ddd;
+            color: #777;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h3>Dear <%= student %>,</h3>
+        </div>
+        <div class="email-body">
+            <p>
+                You have submitted an application for Completion of Program
+            </p>
+            <p>To view the status of your application, please login to USP Student Online Services.</p>
+            <p>Thank you</p>
+            <p><small><em>If you are not able to view your application, please inform the SAS department.</em></small></p>
+        </div>
+        <div class="email-footer">
+            <p>Best Regards,</p>
+            <p>USP Completion Team</p>
+        </div>
+    </div>
+</body>
+
+</html>

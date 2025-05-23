@@ -46,7 +46,7 @@ const createLoginHistory = (studentId, ipAddress, deviceInfo, callback, next) =>
     return next(error); // Pass the error to the error middleware
   }
   const query = `
-    INSERT INTO login_history (student_id, login_time, ip_address, device_info)
+    INSERT INTO login_history (user_id, login_time, ip_address, device_info)
     VALUES (?, NOW(), ?, ?)
   `;
   
