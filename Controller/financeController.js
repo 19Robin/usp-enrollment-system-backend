@@ -1,4 +1,4 @@
-const { getFinanceData, getInvoicesById } = require("../Model/financeModel");
+const { getFinanceData, getInvoicesById, getPaymentsById, updatePayments } = require("../Model/financeModel");
 const AppError = require("../appError");
 
 const getFinanceDataHandler = async (req, res, next) => {
