@@ -13,6 +13,6 @@ const hashPassword = async (password) => {
 };
 
 
-const password = "8888";
+const password = "this is the microservice secret";
 hashPassword(password);
 

@@ -44,7 +44,7 @@ const createLoginHistory = (studentId, ipAddress, deviceInfo, callback) => {
     return callback(new Error("Student ID cannot be null or undefined"), null);
   }
   const query = `
-    INSERT INTO login_history (student_id, login_time, ip_address, device_info)
+    INSERT INTO login_history (user_id, login_time, ip_address, device_info)
     VALUES (?, NOW(), ?, ?)
   `;
   

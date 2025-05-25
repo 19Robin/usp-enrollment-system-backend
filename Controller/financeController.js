@@ -1,4 +1,5 @@
-const { getFinanceData, getInvoicesById, updatePayments, getPaymentsById } = require("../Model/financeModel");
+const axios = require('axios');
+const { getFinanceData, getInvoicesById, updatePayments, getPaymentsById, getStudentsWithInvoices } = require("../Model/financeModel");
 
 const getFinanceDataHandler = async (req, res) => {
     const { category, userID } = req.params;
@@ -69,6 +70,60 @@ const updatePaymentsHandler = async (req, res) => {
     }
 };
 
+const applyHoldsHandler = async (req, res) => {
+  try {
+    const studentIds = await getStudentsWithInvoices();
+    const holdDataArray = [];
+
+    const invoicePromises = studentIds.map(studentId => {
+      return new Promise((resolve) => {
+        getInvoicesById(studentId, (err, invoiceResponse) => {
+          if (err) {
+            console.error(`Error fetching invoices for student ${studentId}:`, err);
+            return resolve(); 
+          }
+
+          const balance = invoiceResponse.payableAmount || 0;
+          console.log(`Balance for student ${studentId}:`, balance);
+
+          if (balance > 0) {
+            holdDataArray.push({
+              studentId,
+              hold: true,
+            });
+          }
+
+          resolve(); 
+        });
+      });
+    });
+
+    // wait for all 
+    await Promise.all(invoicePromises);
+
+    if (holdDataArray.length > 0) {
+      await axios.post('http://localhost:6000/api/holds/', holdDataArray, {
+        headers: {
+          "Authorization": `Bearer ${process.env.MICROSERVICE_SECRET}`
+        }
+      });
+
+      console.log("Holds applied for students:", holdDataArray.map(h => h.studentId));
+    } else {
+      console.log("No students with positive balances found.");
+    }
+
+    res.status(200).json({ message: "Hold process completed." });
+
+  } catch (err) {
+    console.error("Unexpected error:", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+
 const getAllPaymentsHandler = async (req, res) => {
     const studentId = req.user.userId;
     console.log("Extracted User ID from Token:", studentId);
@@ -109,5 +164,6 @@ module.exports = {
     getFinanceDataHandler,
     getInvoicesByIdHandler,
     updatePaymentsHandler,
-    getAllPaymentsHandler
+    getAllPaymentsHandler,
+    applyHoldsHandler
 };

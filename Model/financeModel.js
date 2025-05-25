@@ -1,3 +1,4 @@
+const { get } = require('mongoose');
 const { financeDb, enrolSystemDb} = require('../db');
 
 const getFinanceData = (category, userID, res) => {
@@ -104,6 +105,22 @@ const updatePayments = (customer_id,transaction_id, amount_paid, status, currenc
 
             console.log("Payment inserted successfully. Rows affected:", results.affectedRows);
             callback(null, { success: true, message: "Payments updated successfully." });
+        });
+    });
+};
+
+const getStudentsWithInvoices = () => {
+    return new Promise((resolve, reject) => {
+        const query = `SELECT DISTINCT student_id FROM invoices WHERE student_id IS NOT NULL`;
+
+        enrolSystemDb.query(query, (err, results) => {
+            if (err) {
+                console.error("Error fetching students with invoices:", err);
+                return reject(err);
+            }
+
+            const studentIds = results.map(row => row.student_id);
+            resolve(studentIds);
         });
     });
 };
@@ -250,5 +267,6 @@ module.exports = {
     getFinanceData, 
     getInvoicesById, 
     getPaymentsById,
-    updatePayments
+    updatePayments,
+    getStudentsWithInvoices
 };
