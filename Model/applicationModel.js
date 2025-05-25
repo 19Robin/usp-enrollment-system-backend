@@ -32,6 +32,34 @@ const saveGraduationApplication = (studentId, applicationTypeId = 2, statusId = 
   });
 };
 
+// Save exam-related application (Compassionate, Special Exam, Aegrotat)
+const saveExamApplication = (
+  studentId,
+  applicationTypeId,
+  statusId,
+  reason,
+  courseId,
+  examDate,
+  examTime,
+  supportingDocsUrl
+) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      INSERT INTO exam_applications
+      (student_id, application_type_id, status_id, reason, submitted_at, updated_at, course_id, exam_date, exam_time, supporting_docs_url)
+      VALUES (?, ?, ?, ?, NOW(), NOW(), ?, ?, ?, ?)
+    `;
+    applicationsDb.query(
+      sql,
+      [studentId, applicationTypeId, statusId, reason, courseId, examDate, examTime, supportingDocsUrl],
+      (err, result) => {
+        if (err) return reject(err);
+        resolve(result.insertId);
+      }
+    );
+  });
+};
+
 // Get student name and email
 const getStudentInfo = (studentId) => {
   return new Promise((resolve, reject) => {
@@ -39,7 +67,10 @@ const getStudentInfo = (studentId) => {
       "SELECT CONCAT(first_name, ' ', last_name) AS name, email FROM students WHERE student_id = ? LIMIT 1",
       [studentId],
       (err, results) => {
-        if (err) return reject(err);
+        if (err) {
+          console.error("Error fetching student info:", err);
+          return reject(err);
+        }
         if (!results || results.length === 0) return resolve(null);
         resolve(results[0]);
       }
@@ -47,4 +78,9 @@ const getStudentInfo = (studentId) => {
   });
 };
 
-module.exports = { createGraduationApplicationInDB, saveGraduationApplication, getStudentInfo };
+module.exports = { 
+  createGraduationApplicationInDB, 
+  saveGraduationApplication, 
+  getStudentInfo, 
+  saveExamApplication 
+};

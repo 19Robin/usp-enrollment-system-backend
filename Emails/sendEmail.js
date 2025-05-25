@@ -14,7 +14,7 @@ const sendEmailHandler = async (html, subject, to, cc) => {
 
     let info = await transporter.sendMail({
       from: {
-        name: "USP-noreply",
+        name: "usp-noreply",
         address: process.env.APP_EMAIL,
       },
       to: to,
