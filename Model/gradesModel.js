@@ -40,22 +40,79 @@ const getCompletedCoursesFromDB = (studentId, callback, next) => {
 
 // Function to retrieve completed courses eligible for grade recheck
 const getCompletedCoursesForRecheckFromDB = (studentId, callback, next) => {
+  const allowedTerms = ['202301', '202302', '202401', '202402'];
+
   const gradesQuery = `
-    SELECT g.term, g.course_code AS CourseID, g.grade, c.course_name, c.course_campus, c.course_mode 
-    FROM usp_grades.grades g
-    JOIN usp_enrol_system.courses c ON g.course_code = c.course_code
-    WHERE g.student_id = ? AND g.grade NOT IN ('A', 'B', 'C')
+    SELECT term, course_code AS CourseID, grade 
+    FROM usp_grades.grades 
+    WHERE student_id = ? 
+      AND grade NOT IN ('A', 'B', 'C') 
+      AND term IN (?, ?, ?, ?)
   `;
-  
-  // Query to find completed courses with grades that can be rechecked
-  gradesDb.query(gradesQuery, [studentId], (err, results) => {
+
+  gradesDb.query(gradesQuery, [studentId, ...allowedTerms], (err, gradesResults) => {
     if (err) {
       console.error("Error fetching grades for recheck:", err);
-      return next(err); // Pass the error to the error middleware
+      return next(err);
     }
-    callback(null, results);
+
+    const courseCodes = gradesResults.map(grade => grade.CourseID);
+    if (courseCodes.length === 0) {
+      return callback(null, []); // No eligible grades
+    }
+
+    const coursesQuery = `
+      SELECT course_code, course_name, course_campus, course_mode 
+      FROM usp_enrol_system.courses 
+      WHERE course_code IN (?)
+    `;
+
+    enrolSystemDb.query(coursesQuery, [courseCodes], (err, coursesResults) => {
+      if (err) {
+        console.error("Error fetching course details:", err);
+        return next(err);
+      }
+
+      const coursesMap = coursesResults.reduce((acc, course) => {
+        acc[course.course_code] = {
+          name: course.course_name,
+          campus: course.course_campus,
+          mode: course.course_mode
+        };
+        return acc;
+      }, {});
+
+      const combinedResults = gradesResults.map(grade => ({
+        ...grade,
+        title: coursesMap[grade.CourseID]?.name || 'Unknown Course',
+        campus: coursesMap[grade.CourseID]?.campus || 'Unknown Campus',
+        mode: coursesMap[grade.CourseID]?.mode || 'Unknown Mode'
+      }));
+
+      callback(null, combinedResults);
+    });
   });
 };
+// const getCompletedCoursesForRecheckFromDB = (studentId, callback, next) => {
+//   const allowedTerms = ['202401', '202402', '202301', '202302']; // Define allowed terms for recheck
+  
+//   const gradesQuery = `
+//     SELECT g.term, g.course_code AS CourseID, g.grade, c.course_name, c.course_campus, c.course_mode 
+//     FROM usp_grades.grades g
+//     JOIN usp_enrol_system.courses c ON g.course_code = c.course_code
+//     WHERE g.student_id = ? AND g.grade NOT IN ('B', 'C', 'D', 'F', 'EX')
+//     AND g.term IN (?,?,?,?)
+//   `;
+  
+//   // Query to find completed courses with grades that can be rechecked
+//   gradesDb.query(gradesQuery, [studentId], (err, results) => {
+//     if (err) {
+//       console.error("Error fetching grades for recheck:", err);
+//       return next(err); // Pass the error to the error middleware
+//     }
+//     callback(null, results);
+//   });
+// };
 
 // Function to retrieve course details for a specific student and course code
 const getCourseDetailsByStudentAndCourseFromDB = (studentId, courseCode, callback, next) => {

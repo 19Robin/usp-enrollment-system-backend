@@ -1,5 +1,5 @@
 const { get } = require('mongoose');
-const { getCompletedCoursesFromDB, getCourseDetailsByStudentAndCourseFromDB, getGradeIdFromDB, createApplicationInDB, createGradeRecheckInDB} = require('../Model/gradesModel');
+const { getCompletedCoursesFromDB, getCourseDetailsByStudentAndCourseFromDB, getGradeIdFromDB, createApplicationInDB, createGradeRecheckInDB, getCompletedCoursesForRecheckFromDB} = require('../Model/gradesModel');
 const AppError = require("../appError");
 
 // Function to handle the submission of a grade recheck application
@@ -78,7 +78,7 @@ const getCompletedCourses = async (req, res, next) => {
   const { studentId } = req.query;
   try {
     const completedCourses = await new Promise((resolve, reject) => {
-      getCompletedCoursesFromDB(studentId, (err, results) => {
+      getCompletedCoursesForRecheckFromDB(studentId, (err, results) => {
         if (err) {
           reject(err);
         } else {
