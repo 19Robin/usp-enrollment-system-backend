@@ -39,7 +39,43 @@ const updateRules = async (req, res) => {
   }
 };
 
+const checkHold = async (req, res) => {
+  try{
+
+    const studentId = req.user.userId;
+    
+    const holdRes = await axios.get(`http://localhost:6000/api/holds/${studentId}`, 
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.MICROSERVICE_SECRET}`
+        }
+      }
+    );
+
+    const rulesRes = await axios.get(`http://localhost:6000/api/rules`, 
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.MICROSERVICE_SECRET}`
+        }
+      }
+    );
+
+    res.json({
+      hold: holdRes.data,
+      rules: rulesRes.data
+    });
+
+
+  }catch(error){
+    console.error("Error fetching hold status:", error.message);
+    res.status(500).json({ message: "Failed to fetch hold status from microservice" });
+
+  }
+  
+};
+
 module.exports = {
   getRulesFromMicroservice,
-  updateRules
+  updateRules,
+  checkHold
 };

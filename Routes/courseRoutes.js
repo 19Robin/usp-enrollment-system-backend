@@ -13,7 +13,7 @@ router.get("/course-prerequisites", getCoursePrerequisites);
 router.post("/registerCourse", registerCourse);
 
 // Define the route to get active registrations
-router.get("/active-registrations", holdCheck('registration'),getActiveRegistrations);
+router.get("/active-registrations",getActiveRegistrations);
 
 // Define the route to get dropped registrations
 router.get("/dropped-registrations", getDroppedRegistrations);

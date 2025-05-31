@@ -5,6 +5,6 @@ const holdCheck = require("../Middleware/holdCheck");
 const router = express.Router();
 
 // Define the route to get program courses based on student ID
-router.get("/program-courses", holdCheck('audit'),getProgramCourses);
+router.get("/program-courses",getProgramCourses);
 
 module.exports = router;
