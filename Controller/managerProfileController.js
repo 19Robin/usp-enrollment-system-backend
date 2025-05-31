@@ -1,8 +1,9 @@
 const { get } = require('mongoose');
 const { getManagerProfilebyId } = require('../Model/userModel');
 const errorCodes = require('./errorCodes');
+const AppError = require("../appError");
 
-const ManagerProfileHandler = async (req, res) => {
+const ManagerProfileHandler = async (req, res, next) => {
     const managerId = req.user.userId;
     console.log("Extracted User ID from Token:", managerId); 
 
@@ -32,7 +33,8 @@ const ManagerProfileHandler = async (req, res) => {
         });
     } catch (error) {
         console.error("Error fetching manager profile:", error);
-        res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
+        //res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
+        next(new AppError("DB_ERROR", "Error fetching manager profile", 500));
     }
 }
 

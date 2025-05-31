@@ -8,6 +8,7 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 const jobs = require('./Model/jobs');
+const errorHandler = require('./Middleware/errorHandler');
 
 // middlewares
 app.use(bodyParser.json({ limit: "10mb" }));
@@ -20,11 +21,11 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/finance", financeRoutes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send({details: { message: 'Something went wrong!'}});
-});
+// // Error handling middleware
+// app.use((err, req, res, next) => {
+//     console.error(err.stack);
+//     res.status(500).send({details: { message: 'Something went wrong!'}});
+// });
 
 // test route
 app.get("/", (req, res) => {
@@ -55,5 +56,11 @@ app.get('/downloadFile', (req, res) => {
     }
 });
 
+const schema = Joi.object({
+    userID: Joi.number().required(),
+})
+
+//Register the error handler middleware
+app.use(errorHandler);
 
 module.exports = app;

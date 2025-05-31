@@ -1,6 +1,7 @@
 const { financeDb } = require('../db');
+const AppError = require("../appError");
 
-const getHoldStatus = (studentId, res) => {
+const getHoldStatus = (studentId, res, next) => {
 
     const query = "SELECT hold_status FROM holds WHERE student_id = ?";
 
@@ -8,7 +9,8 @@ const getHoldStatus = (studentId, res) => {
 
         if (err) {
             console.error("Error fetching hold status:", err);
-            return res.status(500).json({ error: "Database error" });
+            //return res.status(500).json({ error: "Database error" });
+            next(new AppError("DB_ERROR", "Error fetching hold status", 500));
         }
 
         if (result.length > 0) {

@@ -7,7 +7,7 @@ const manager = {
   first_name: 'Litia',
   last_name: 'Konusi',
   dob: '1980-01-01',
-  email: 'john.doe@example.com',
+  email: 'litia.konusi@gmail.com',
   phone: '1234567890',
   password: 'password5',
   role: 'manager'

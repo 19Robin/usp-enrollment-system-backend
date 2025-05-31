@@ -1,8 +1,9 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\programCourseController.js
 const { getProgramCourses } = require('../Model/programCourseModel');
 const { getStudentProfileById } = require('../Model/studentProfileModel');
+const AppError = require("../appError");
 
-const getProgramCoursesHandler = async (req, res) => {
+const getProgramCoursesHandler = async (req, res, next) => {
   const { studentId } = req.query;
 
   try {
@@ -37,7 +38,8 @@ const getProgramCoursesHandler = async (req, res) => {
     res.status(200).json(programCourses);
   } catch (error) {
     console.error("Error fetching program courses:", error);
-    res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
+    //res.status(500).json({ details: { message: "An Unexpected Error Occurred" } });
+    next(new AppError("DB_ERROR", "Error fetching program courses", 500)); // Pass the error to the error middleware
   }
 };
 

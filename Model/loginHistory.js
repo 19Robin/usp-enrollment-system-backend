@@ -39,9 +39,11 @@
 const { enrolSystemDb } = require('../db');  // Use the correct import for your MySQL connection
 
 // Function to create a login history entry
-const createLoginHistory = (studentId, ipAddress, deviceInfo, callback) => {
+const createLoginHistory = (studentId, ipAddress, deviceInfo, callback, next) => {
   if (!studentId) {
-    return callback(new Error("Student ID cannot be null or undefined"), null);
+    const error = new Error("Student ID cannot be null or undefined");
+    error.status = 400; // Bad Request
+    return next(error); // Pass the error to the error middleware
   }
   const query = `
     INSERT INTO login_history (user_id, login_time, ip_address, device_info)
@@ -51,14 +53,14 @@ const createLoginHistory = (studentId, ipAddress, deviceInfo, callback) => {
   enrolSystemDb.query(query, [studentId, ipAddress, deviceInfo], (err, results) => {
     if (err) {
       console.error("Error creating login history:", err);
-      return callback(err, null);
-    }
+      return next(err); // Pass the error to the error middleware
+   }
     callback(null, results);  // Return the result of the insertion
   });
 };
 
 // Function to update logout time for a login history entry
-const updateLogoutTime = (loginId, callback) => {
+const updateLogoutTime = (loginId, callback, next) => {
   const query = `
     UPDATE login_history 
     SET logout_time = NOW() 
@@ -68,7 +70,7 @@ const updateLogoutTime = (loginId, callback) => {
   enrolSystemDb.query(query, [loginId], (err, results) => {
     if (err) {
       console.error("Error updating logout time:", err);
-      return callback(err, null);
+      return next(err); // Pass the error to the error middleware
     }
     callback(null, results);  // Return the result of the update
   });

@@ -2,9 +2,10 @@ const { enrolSystemDb } = require('../db');
 
 const getStudentProfileById = (studentId, callback) => {
   const query = `
-    SELECT student_id, first_name, last_name, dob, email, phone, program_id, program_code
-    FROM students
-    WHERE student_id = ?
+    SELECT s.student_id, s.first_name, s.last_name, s.dob, s.email, s.phone, s.program_id, p.program_code
+    FROM students s
+    JOIN programs p ON s.program_id = p.program_id
+    WHERE s.student_id = ?
   `;
   enrolSystemDb.query(query, [studentId], (err, results) => {
     if (err) {

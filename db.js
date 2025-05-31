@@ -49,6 +49,20 @@ const financeDb = mysql.createPool({
   connectTimeout: 20000, // Increase timeout to 20 seconds
 });
 
+// Applications Database Connection
+const applicationsDb = mysql.createPool({
+  host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
+  port: process.env.DB_PORT || 4000,
+  user: process.env.DB_USER || '3w9dbUCq2F.root',
+  password: process.env.DB_PASSWORD || 'kVlsmGJIgPWEw9MH',
+  database: process.env.DB_NAME_APPLICATIONS || 'usp_applications',
+  ssl: sslOptions,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  connectTimeout: 20000, // Increase timeout to 20 seconds
+});
+
 // Test Connections
 enrolSystemDb.getConnection((err, connection) => {
   if (err) {
@@ -77,4 +91,13 @@ financeDb.getConnection((err, connection) => {
   }
 });
 
-module.exports = { enrolSystemDb, gradesDb, financeDb };
+applicationsDb.getConnection((err, connection) => {
+  if (err) {
+    console.error('Applications Database connection failed: ' + err.message);
+  } else {
+    console.log('Connected to Applications MySQL Database');
+    connection.release();
+  }
+});
+
+module.exports = { enrolSystemDb, gradesDb, financeDb, applicationsDb };
