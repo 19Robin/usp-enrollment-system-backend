@@ -78,9 +78,33 @@ const getStudentInfo = (studentId) => {
   });
 };
 
+const getAllStudentApplications = (studentId) => {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT 
+        a.id AS applicationId,
+        YEAR(a.submitted_at) AS yearApplied,
+        a.student_id AS studentId,
+        t.type AS applicationType,
+        s.status_name AS status,
+        a.submitted_at AS dateApplied
+      FROM usp_applications.applications a
+      JOIN usp_applications.app_type t ON a.application_type_id = t.type_id
+      JOIN usp_applications.app_statuses s ON a.status_id = s.id
+      WHERE a.student_id = ?
+      ORDER BY a.submitted_at DESC
+    `;
+    applicationsDb.query(sql, [studentId], (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
+};
+
 module.exports = { 
   createGraduationApplicationInDB, 
   saveGraduationApplication, 
   getStudentInfo, 
-  saveExamApplication 
+  saveExamApplication,
+  getAllStudentApplications
 };
