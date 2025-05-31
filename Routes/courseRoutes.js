@@ -1,7 +1,6 @@
 const express = require("express");
 const { getCourses, registerCourse, cancelCourse, getActiveRegistrations, getDroppedRegistrations, getCoursePrerequisites } = require("../Controller/courseController");
 const router = express.Router();
-const holdCheck = require("../Middleware/holdCheck");
 
 // Define the route to get courses
 router.get("/courses", getCourses);
