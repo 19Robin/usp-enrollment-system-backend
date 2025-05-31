@@ -14,7 +14,7 @@ router.post("/registerCourse", registerCourse);
 router.post("/cancelCourse", cancelCourse);
 
 // Define the route to get active registrations
-router.get("/active-registrations", getActiveRegistrations);
+router.get("/active-registrations",getActiveRegistrations);
 
 // Define the route to get dropped registrations
 router.get("/dropped-registrations", getDroppedRegistrations);

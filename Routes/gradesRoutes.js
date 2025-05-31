@@ -1,6 +1,7 @@
 const express = require("express");
 const { getCompletedCourses, getCourseDetails, submitGradeRecheckApplication} = require("../Controller/gradesController");
 const router = express.Router();
+const auth = require("../Middleware/JWT/authenticateJWT");
 
 // Define the route to get completed courses
 router.get("/completed-courses", getCompletedCourses);

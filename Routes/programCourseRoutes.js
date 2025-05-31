@@ -4,6 +4,6 @@ const { getProgramCourses } = require("../Controller/programCourseController");
 const router = express.Router();
 
 // Define the route to get program courses based on student ID
-router.get("/program-courses", getProgramCourses);
+router.get("/program-courses",getProgramCourses);
 
 module.exports = router;
