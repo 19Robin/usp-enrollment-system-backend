@@ -60,6 +60,11 @@ const schema = Joi.object({
     userID: Joi.number().required(),
 })
 
+app.use((err, req, res, next) => {
+  console.error('Global error handler:', err);
+  res.status(err.statusCode || 500).json({ message: err.message || 'Internal server error.' });
+});
+
 //Register the error handler middleware
 app.use(errorHandler);
 

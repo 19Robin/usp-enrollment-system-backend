@@ -39,6 +39,7 @@ function parseExamDate(dateStr) {
 
 // Graduation Application
 const submitGraduationApplication = async (req, res) => {
+  console.log("Received graduation application:", req.body);
   const { studentId, applicationData } = req.body;
   if (!studentId || !applicationData) {
     return res.status(400).json({ message: "Missing studentId or applicationData" });
@@ -58,8 +59,8 @@ const submitGraduationApplication = async (req, res) => {
     }
     res.status(201).json({ message: "Graduation application submitted and notification sent." });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to submit graduation application." });
+    console.error("Graduation application error:", err);
+    res.status(500).json({ message: "Failed to submit graduation application.", error: err.message });
   }
 };
 

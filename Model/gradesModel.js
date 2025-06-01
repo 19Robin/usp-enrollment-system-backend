@@ -6,31 +6,38 @@ const getCompletedCoursesFromDB = (studentId, callback, next) => {
   gradesDb.query(gradesQuery, [studentId], (err, gradesResults) => {
     if (err) {
       console.error("Error fetching grades:", err);
-      return next(err); // Pass the error to the error middleware
+      return next(err);
     }
 
     const courseCodes = gradesResults.map(grade => grade.CourseID);
     if (courseCodes.length === 0) {
-      return callback(null, gradesResults);
+      return callback(null, []);
     }
 
+    // Fetch course_mode as well
     const coursesQuery = 'SELECT course_code, course_name, course_campus, course_mode FROM courses WHERE course_code IN (?)';
     enrolSystemDb.query(coursesQuery, [courseCodes], (err, coursesResults) => {
       if (err) {
         console.error("Error fetching courses:", err);
-        return next(err); // Pass the error to the error middleware
+        return next(err);
       }
 
       const coursesMap = coursesResults.reduce((acc, course) => {
-        acc[course.course_code] = { name: course.course_name, campus: course.course_campus, mode: course.course_mode };
+        acc[course.course_code] = {
+          name: course.course_name,
+          campus: course.course_campus,
+          mode: course.course_mode // <-- include mode
+        };
         return acc;
       }, {});
 
       const combinedResults = gradesResults.map(grade => ({
-        ...grade,
+        term: grade.term,
+        course: grade.CourseID,
         title: coursesMap[grade.CourseID]?.name || 'Unknown Course',
         campus: coursesMap[grade.CourseID]?.campus || 'Unknown Campus',
-        mode: coursesMap[grade.CourseID]?.mode || 'Unknown Mode'
+        mode: coursesMap[grade.CourseID]?.mode || 'N/A', // <-- return mode
+        grade: grade.grade
       }));
 
       callback(null, combinedResults);
@@ -120,6 +127,7 @@ const getCourseDetailsByStudentAndCourseFromDB = (studentId, courseCode, callbac
     SELECT term, course_code AS CourseID, grade
     FROM usp_grades.grades
     WHERE student_id = ? AND course_code = ?
+    LIMIT 1
   `;
 
   gradesDb.query(gradesQuery, [studentId, courseCode], (err, gradesResults) => {
@@ -128,14 +136,15 @@ const getCourseDetailsByStudentAndCourseFromDB = (studentId, courseCode, callbac
       return next(err);
     }
 
-    if (gradesResults.length === 0) {
-      return callback(null, []); // No grades found
+    if (!gradesResults || gradesResults.length === 0) {
+      return callback(null, null); // No grades found
     }
 
     const coursesQuery = `
       SELECT course_code, course_name, course_campus, course_mode
       FROM usp_enrol_system.courses
       WHERE course_code = ?
+      LIMIT 1
     `;
 
     enrolSystemDb.query(coursesQuery, [courseCode], (err, coursesResults) => {
@@ -144,17 +153,18 @@ const getCourseDetailsByStudentAndCourseFromDB = (studentId, courseCode, callbac
         return next(err);
       }
 
-      if (coursesResults.length === 0) {
-        return callback(null, []); // No course details found
-      }
+      const grade = gradesResults[0];
+      const course = (coursesResults && coursesResults.length > 0) ? coursesResults[0] : {};
 
-      // Combine grades and course details
-      const combinedResult = gradesResults.map(grade => ({
-        ...grade,
-        title: coursesResults[0].course_name || "Unknown Course",
-        campus: coursesResults[0].course_campus || "Unknown Campus",
-        mode: coursesResults[0].course_mode || "Unknown Mode",
-      }));
+      // Combine grades and course details into a single object
+      const combinedResult = {
+        CourseID: grade.CourseID,
+        term: grade.term,
+        grade: grade.grade,
+        title: course.course_name || "Unknown Course",
+        campus: course.course_campus || "Unknown Campus",
+        mode: course.course_mode || "Unknown Mode"
+      };
 
       callback(null, combinedResult);
     });

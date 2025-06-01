@@ -1,11 +1,21 @@
 const { get } = require('mongoose');
-const {gradeRecheckApplication, getCompletedCoursesFromDB, getCourseDetailsByStudentAndCourseFromDB, getGradeIdFromDB, createApplicationInDB, createGradeRecheckInDB, getCompletedCoursesForRecheckFromDB} = require('../Model/gradesModel');
+const {
+  gradeRecheckApplication,
+  getCompletedCoursesFromDB,
+  getCourseDetailsByStudentAndCourseFromDB,
+  getGradeIdFromDB,
+  createApplicationInDB,
+  createGradeRecheckInDB,
+  getCompletedCoursesForRecheckFromDB
+} = require('../Model/gradesModel');
+const { getStudentInfo } = require('../Model/applicationModel');
+const { sendGradeRecheckApplicationEmail } = require('../Emails/application');
 const AppError = require("../appError");
 const { application } = require('express');
 
 // Function to handle the submission of a grade recheck application
 const submitGradeRecheckApplication = async (req, res, next) => {
-  const { studentId, courseCode, lecturerName, reason, term, recieptNumber, application_type_id, status_id} = req.body;
+  const { studentId, courseCode, lecturerName, reason, term, recieptNumber, application_type_id, status_id } = req.body;
 
   if (!studentId || !courseCode || !lecturerName || !reason || !term || !recieptNumber) {
     return res.status(400).json({
@@ -27,20 +37,40 @@ const submitGradeRecheckApplication = async (req, res, next) => {
     const appId = await createApplicationInDB(studentId);
 
     if (!appId) {
-      throw new AppError('DB_ERROR', 'Failed to create application.', 500);
+      return res.status(500).json({ message: "Failed to create application." });
     }
 
     console.log("Creating grade recheck entry...");
 
-    await createGradeRecheckInDB(studentId, lecturerName, reason, gradeId, appId, recieptNumber, application_type_id, status_id);
+    await createGradeRecheckInDB(
+      studentId,
+      lecturerName,
+      reason,
+      gradeId,
+      appId,
+      recieptNumber,
+      application_type_id || 2,
+      status_id || 1
+    );
+
+    // --- Send notification email to student ---
+    try {
+      const student = await getStudentInfo(studentId);
+      if (student && student.email) {
+        await sendGradeRecheckApplicationEmail(student.name, student.email);
+      }
+    } catch (emailErr) {
+      console.error("Warning: Application saved but failed to send email:", emailErr);
+    }
 
     console.log("Grade recheck application submitted successfully for student:", studentId, "recieptNumber:", recieptNumber);
 
-    res.status(201).json({ message: "Grade Recheck Application Submitted Successfully" });
+    return res.status(201).json({ message: "Grade Recheck Application Submitted Successfully" });
 
   } catch (error) {
     console.error("Error in submitGradeRecheckApplication:", error);
-    next(new AppError("DB_ERROR", "Grade Recheck Application Submission Failed", 500));
+    // Always send a response!
+    return res.status(500).json({ message: "Grade Recheck Application Submission Failed", error: error.message });
   }
 };
 
@@ -77,19 +107,19 @@ const getCourseDetails = (req, res, next) => {
       return res.status(500).json({ message: 'Internal server error.' });
     }
 
-    if (!courseDetails || courseDetails.length === 0) {
+    if (!courseDetails) {
       console.log('No course details found for the given student and course code.');
       return res.status(404).json({ message: 'Course details not found.' });
     }
 
     // Prepare response matching frontend expectations
     const response = {
-      course_code: courseDetails[0].CourseID,       // Note: your DB returns CourseID, not course_code
-      course_name: courseDetails[0].title,
-      grade: courseDetails[0].grade,
-      term: courseDetails[0].term,
-      campus: courseDetails[0].campus,
-      mode: courseDetails[0].mode
+      course_code: courseDetails.CourseID,
+      course_name: courseDetails.title,
+      grade: courseDetails.grade,
+      term: courseDetails.term,
+      campus: courseDetails.campus,
+      mode: courseDetails.mode
     };
 
     console.log('Course details:', response);
@@ -101,7 +131,7 @@ const getCompletedCourses = async (req, res, next) => {
   const { studentId } = req.query;
   try {
     const completedCourses = await new Promise((resolve, reject) => {
-      getCompletedCoursesForRecheckFromDB(studentId, (err, results) => {
+      getCompletedCoursesFromDB(studentId, (err, results) => { // <-- FIXED: use all grades
         if (err) {
           reject(err);
         } else {
@@ -112,7 +142,6 @@ const getCompletedCourses = async (req, res, next) => {
     res.status(200).json(completedCourses);
   } catch (error) {
     console.error("Error fetching completed courses:", error);
-    //res.status(500).json({ error: "Failed to fetch completed courses" });
     next(new AppError("DB_ERROR", "Error fetching completed courses", 500));
   }
 };
