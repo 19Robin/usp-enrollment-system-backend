@@ -53,7 +53,7 @@ const getCompletedCoursesForRecheckFromDB = (studentId, callback, next) => {
   gradesDb.query(gradesQuery, [studentId, ...allowedTerms], (err, gradesResults) => {
     if (err) {
       console.error("Error fetching grades for recheck:", err);
-      return next(err);
+      return callback(err);
     }
 
     const courseCodes = gradesResults.map(grade => grade.CourseID);
