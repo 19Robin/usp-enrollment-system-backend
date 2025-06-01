@@ -12,6 +12,8 @@ const {
   sendSpecialExamApplicationEmail
 } = require("../Emails/application");
 
+const { getApplicationByStudentIdFromDB, getGradeRecheckApplicationDetailsFromDB, getExamApplicationDetailsFromDB} = require("../Model/applicationModel");
+
 function parseExamTime(timeStr) {
   // Converts '10am', '9am', '2pm', '10:30am', etc. to 'HH:MM:SS'
   if (!timeStr) return null;
@@ -98,18 +100,18 @@ const submitExamApplication = (applicationTypeId, sendEmailFn) => async (req, re
   }
 };
 
-const getStudentApplications = async (req, res) => {
-  const studentId = req.query.studentId;
-  if (!studentId) {
-    return res.status(400).json({ message: "Missing studentId" });
-  }
-  try {
-    const apps = await getAllStudentApplications(studentId);
-    res.json(apps);
-  } catch (err) {
-    console.error("Error fetching applications:", err);
-    res.status(500).json({ message: "Failed to fetch applications" });
-  }
+const getAllApplications = (req, res, next) => {
+    const studentId = req.params.studentId;
+
+    if(!studentId) {
+        return res.status(400).json({ error: 'Student ID is required' });
+    }
+
+    getApplicationByStudentIdFromDB(studentId, (err, data) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+
+        res.json(data);
+    }, next);
 };
 
 // Set your application_type_id values as needed
@@ -118,6 +120,7 @@ const submitAegrotatApplication = submitExamApplication(4, sendAegrotatPassAppli
 const submitSpecialExamApplication = submitExamApplication(5, sendSpecialExamApplicationEmail);
 
 module.exports = {
+  getAllApplications,
   submitGraduationApplication,
   submitCompassionateApplication,
   submitAegrotatApplication,

@@ -1,10 +1,11 @@
 const { get } = require('mongoose');
-const { getCompletedCoursesFromDB, getCourseDetailsByStudentAndCourseFromDB, getGradeIdFromDB, createApplicationInDB, createGradeRecheckInDB} = require('../Model/gradesModel');
+const {gradeRecheckApplication, getCompletedCoursesFromDB, getCourseDetailsByStudentAndCourseFromDB, getGradeIdFromDB, createApplicationInDB, createGradeRecheckInDB, getCompletedCoursesForRecheckFromDB} = require('../Model/gradesModel');
 const AppError = require("../appError");
+const { application } = require('express');
 
 // Function to handle the submission of a grade recheck application
 const submitGradeRecheckApplication = async (req, res, next) => {
-  const { studentId, courseCode, lecturerName, reason, term, recieptNumber} = req.body;
+  const { studentId, courseCode, lecturerName, reason, term, recieptNumber, application_type_id, status_id} = req.body;
 
   if (!studentId || !courseCode || !lecturerName || !reason || !term || !recieptNumber) {
     return res.status(400).json({
@@ -31,7 +32,7 @@ const submitGradeRecheckApplication = async (req, res, next) => {
 
     console.log("Creating grade recheck entry...");
 
-    await createGradeRecheckInDB(lecturerName, reason, gradeId, appId, recieptNumber);
+    await createGradeRecheckInDB(studentId, lecturerName, reason, gradeId, appId, recieptNumber, application_type_id, status_id);
 
     console.log("Grade recheck application submitted successfully for student:", studentId, "recieptNumber:", recieptNumber);
 
@@ -43,6 +44,28 @@ const submitGradeRecheckApplication = async (req, res, next) => {
   }
 };
 
+//check if application already exists for a student and course code
+const checkApplication = async (req, res) => {
+  try {
+    const { studentId, courseCode, term } = req.params; // ✅ Use params, not query
+    const gradeId = await getGradeIdFromDB(studentId, courseCode, term);
+
+    if (!gradeId) {
+      return res.status(404).json({ message: "Grade not found for student and course." });
+    }
+
+    if (!studentId || !courseCode) {
+      return res.status(400).json({ error: 'Missing studentId or courseCode' });
+    }
+
+    const alreadyApplied = await gradeRecheckApplication.exists(studentId, gradeId);
+
+    res.json({ exists: alreadyApplied }); // ✅ Make sure the frontend gets { exists: true/false }
+  } catch (error) {
+    console.error('Error checking application:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
 // Function to get course details for a specific student and course code
 const getCourseDetails = (req, res, next) => {
   const { studentId, courseCode } = req.params;
@@ -78,7 +101,7 @@ const getCompletedCourses = async (req, res, next) => {
   const { studentId } = req.query;
   try {
     const completedCourses = await new Promise((resolve, reject) => {
-      getCompletedCoursesFromDB(studentId, (err, results) => {
+      getCompletedCoursesForRecheckFromDB(studentId, (err, results) => {
         if (err) {
           reject(err);
         } else {
@@ -98,4 +121,5 @@ module.exports = {
   getCompletedCourses,
   getCourseDetails,
   submitGradeRecheckApplication,
+  checkApplication
 };
