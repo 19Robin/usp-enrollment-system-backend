@@ -114,6 +114,21 @@ const getAllApplications = (req, res, next) => {
     }, next);
 };
 
+const getStudentApplications = async (req, res) => {
+  const studentId = req.query.studentId;
+  if (!studentId) {
+    return res.status(400).json({ message: "Missing studentId" });
+  }
+  try {
+    // getAllStudentApplications should be imported from your model
+    const apps = await getAllStudentApplications(studentId);
+    res.json(apps);
+  } catch (err) {
+    console.error("Error fetching applications:", err);
+    res.status(500).json({ message: "Failed to fetch applications" });
+  }
+};
+
 // Set your application_type_id values as needed
 const submitCompassionateApplication = submitExamApplication(3, sendCompassionatePassApplicationEmail);
 const submitAegrotatApplication = submitExamApplication(4, sendAegrotatPassApplicationEmail);

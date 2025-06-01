@@ -78,27 +78,6 @@ const getStudentInfo = (studentId) => {
   });
 };
 
-<<<<<<< HEAD
-const getAllStudentApplications = (studentId) => {
-  return new Promise((resolve, reject) => {
-    const sql = `
-      SELECT 
-        a.id AS applicationId,
-        YEAR(a.submitted_at) AS yearApplied,
-        a.student_id AS studentId,
-        t.type AS applicationType,
-        s.status_name AS status,
-        a.submitted_at AS dateApplied
-      FROM usp_applications.applications a
-      JOIN usp_applications.app_type t ON a.application_type_id = t.type_id
-      JOIN usp_applications.app_statuses s ON a.status_id = s.id
-      WHERE a.student_id = ?
-      ORDER BY a.submitted_at DESC
-    `;
-    applicationsDb.query(sql, [studentId], (err, results) => {
-      if (err) return reject(err);
-      resolve(results);
-=======
 // Get all applications (merged from 3 application tables)
 const getApplicationByStudentIdFromDB = (studentId, callback, next) => {
   const appTypeQuery = `SELECT type_id AS id, type AS name FROM app_type`;
@@ -152,13 +131,10 @@ const getApplicationByStudentIdFromDB = (studentId, callback, next) => {
         callback(null, result);
       })
       .catch(next);
->>>>>>> 178513730ae56c7f005c7e240faf1a5e6a24e0a2
     });
   });
 };
 
-<<<<<<< HEAD
-=======
 // Get details of a specific grade recheck application
 const getGradeRecheckApplicationDetailsFromDB = (applicationId, applicationTypeId, callback, next) => {
   const sql = `
@@ -254,17 +230,12 @@ const getExamApplicationDetailsFromDB = (applicationId, applicationTypeId, callb
 //     const applicationQuery = 'SELECT id, submitted_at, status_id, grade_id, lecturer, reason FROM grade_recheck_applications WHERE id = ? AND application_type_id = ?';
 // }
 
->>>>>>> 178513730ae56c7f005c7e240faf1a5e6a24e0a2
 module.exports = { 
   createGraduationApplicationInDB, 
   saveGraduationApplication, 
   getStudentInfo, 
   saveExamApplication,
-<<<<<<< HEAD
-  getAllStudentApplications
-=======
   getApplicationByStudentIdFromDB,
   getGradeRecheckApplicationDetailsFromDB,
   getExamApplicationDetailsFromDB
->>>>>>> 178513730ae56c7f005c7e240faf1a5e6a24e0a2
 };
