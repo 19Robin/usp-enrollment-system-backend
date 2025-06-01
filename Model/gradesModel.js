@@ -46,7 +46,7 @@ const getCompletedCoursesForRecheckFromDB = (studentId, callback, next) => {
     SELECT term, course_code AS CourseID, grade 
     FROM usp_grades.grades 
     WHERE student_id = ? 
-      AND grade NOT IN ('A', 'B', 'C') 
+      AND grade NOT IN ('A') 
       AND term IN (?, ?, ?, ?)
   `;
 
