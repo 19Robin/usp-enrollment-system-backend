@@ -189,11 +189,36 @@ const getGradeIdFromDB = (studentId, courseCode, term) => {
 };
 
 //Function to create a grade recheck application in the database 
-const createGradeRecheckInDB = async (lecturerName, reason, gradeId, appId, recieptNumber) => {
-  console.log("createGradeRecheckInDB called with:", { lecturerName, reason, gradeId, appId, recieptNumber });
-  const sql = 'INSERT INTO usp_applications.grade_recheck_applications (lecturer_name, reason, grade_id, app_id, receipt_number) VALUES (?, ?, ?, ?, ?)';
-  await applicationsDb.execute(sql, [lecturerName, reason, gradeId, appId, recieptNumber]); // Use applicationsDb explicitly
+const createGradeRecheckInDB = async (studentId, lecturerName, reason, gradeId, appId, recieptNumber, application_type_id = 2, status_id=1) => {
+  console.log("createGradeRecheckInDB called with:", {studentId, lecturerName, reason, gradeId, appId, recieptNumber, application_type_id, status_id});
+  const sql = 'INSERT INTO usp_applications.grade_recheck_applications (lecturer_name, reason, grade_id, app_id, receipt_number, application_type_id, status_id, student_id, submitted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())';
+  await applicationsDb.execute(sql, [lecturerName, reason, gradeId, appId, recieptNumber, application_type_id, status_id, studentId]); // Use applicationsDb explicitly
   console.log("Grade recheck application created in DB.");
+};
+
+// const gradeRecheckApplication = {
+//   async exists(studentId, courseCode) {
+//     const sql = `SELECT COUNT(*) AS count FROM usp_applications.grade_recheck_applications 
+//                  WHERE student_id = ? AND course_code = ?`;
+//     const [rows] = await applicationsDb.execute(sql, [studentId, courseCode]);
+//     return rows[0].count > 0;  // true if at least one application exists
+//   }
+// };
+
+// Function to check if a grade recheck application already exists for a student and course code
+const gradeRecheckApplication = {
+  exists: (studentId, gradeId) => {
+    return new Promise((resolve, reject) => {
+      const sql = `
+        SELECT id FROM grade_recheck_applications
+        WHERE student_id = ? AND grade_id = ?
+      `;
+      applicationsDb.query(sql, [studentId, gradeId], (err, results) => {
+        if (err) return reject(err);
+        resolve(results.length > 0);
+      });
+    });
+  }
 };
 
 // Function to create a new application in the database
@@ -229,4 +254,5 @@ module.exports = {
   getCourseDetailsByStudentAndCourseFromDB,
   getCompletedCoursesForRecheckFromDB,
   getCompletedCoursesFromDB,
+  gradeRecheckApplication
 };

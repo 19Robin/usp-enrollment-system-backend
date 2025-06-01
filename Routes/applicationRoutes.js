@@ -1,11 +1,15 @@
 const express = require("express");
 const { 
+  getAllApplications,
   submitGraduationApplication,
   submitCompassionateApplication,
   submitAegrotatApplication,
   submitSpecialExamApplication
 } = require("../Controller/applicationController");
 const router = express.Router();
+
+router.get("/view-all-applications/:studentId", getAllApplications);
+//router.get("/view-application-details/:applicationId", getApplicationDetails);
 
 router.post("/graduation", submitGraduationApplication);
 router.post("/compassionate", submitCompassionateApplication);
