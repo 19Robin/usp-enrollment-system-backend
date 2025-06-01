@@ -1,6 +1,8 @@
+require('dotenv').config();
 const mysql = require('mysql2');
 const fs = require('fs');
 const path = require('path');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Load SSL certificate
 const sslOptions = {
@@ -11,7 +13,7 @@ const sslOptions = {
 const enrolSystemDb = mysql.createPool({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
   port: process.env.DB_PORT || 4000,
-  user: process.env.DB_USER || '3w9dbUCq2F.root',
+  user: process.env.DB_USER || '3w9dbUCq2Ffaa6F.root',
   password: process.env.DB_PASSWORD || 'kVlsmGJIgPWEw9MH',
   database: process.env.DB_NAME_ENROL || 'usp_enrol_system',
   ssl: sslOptions,
@@ -25,7 +27,7 @@ const enrolSystemDb = mysql.createPool({
 const gradesDb = mysql.createPool({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
   port: process.env.DB_PORT || 4000,
-  user: process.env.DB_USER || '3w9dbUCq2F.root',
+  user: process.env.DB_USER || '3w9dbUCq2Ffaa6F.root',
   password: process.env.DB_PASSWORD || 'kVlsmGJIgPWEw9MH',
   database: process.env.DB_NAME_GRADES || 'usp_grades',
   ssl: sslOptions,
@@ -39,7 +41,7 @@ const gradesDb = mysql.createPool({
 const financeDb = mysql.createPool({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
   port: process.env.DB_PORT || 4000,
-  user: process.env.DB_USER || '3w9dbUCq2F.root',
+  user: process.env.DB_USER || '3w9dbUCq2Ffaa6F.root',
   password: process.env.DB_PASSWORD || 'kVlsmGJIgPWEw9MH',
   database: process.env.DB_NAME_FINANCE || 'usp_finance',
   ssl: sslOptions,
@@ -53,7 +55,7 @@ const financeDb = mysql.createPool({
 const applicationsDb = mysql.createPool({
   host: process.env.DB_HOST || 'gateway01.ap-northeast-1.prod.aws.tidbcloud.com',
   port: process.env.DB_PORT || 4000,
-  user: process.env.DB_USER || '3w9dbUCq2F.root',
+  user: process.env.DB_USER || '3w9dbUCq2Ffaa6F.root',
   password: process.env.DB_PASSWORD || 'kVlsmGJIgPWEw9MH',
   database: process.env.DB_NAME_APPLICATIONS || 'usp_applications',
   ssl: sslOptions,

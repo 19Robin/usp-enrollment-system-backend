@@ -1,8 +1,10 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Routes\authRoutes.js
+require('dotenv').config();
 const express = require("express");
 const { loginAttempt } = require("../Controller/authController");
 const authenticateUserJWT = require("../Middleware/JWT/authenticateJWT");
 const router = express.Router();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Define the login route
 router.post("/login", loginAttempt);

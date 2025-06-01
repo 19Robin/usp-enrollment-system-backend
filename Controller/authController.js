@@ -1,9 +1,11 @@
 // filepath: c:\Users\slade\Downloads\CS415\Assignment 1\usp-enrollment-system-backend\Controller\authController.js
+require('dotenv').config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { getStudentById, getManagerById, getRoleById} = require("../Model/userModel");
 const errorCodes = require("./errorCodes");
 const {createLoginHistory, updateLogoutTime} = require("../Model/loginHistory");
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const { get } = require("mongoose");
 require("dotenv").config();
