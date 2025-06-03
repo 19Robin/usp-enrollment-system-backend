@@ -8,5 +8,5 @@ To run tests, use following command:
 
 * npm run test
 
-Note: Any changes to the code will cause a rerun of the entire test file (it has been setup that way). If you have large changes,
-try to close the test terminal and make changes before rerunning all tests.
+**********************LINK TO READ ME FILE WITH CS415 ASSIGNMENT 3 FEATURE AND TESTING DESCRIPTIONS*****************************
+Link: https://drive.google.com/file/d/1wf78Re92N8hF0acXruTpUDmCfaAO9NpW/view?usp=sharing
